@@ -1,4 +1,5 @@
 require "gol2/version"
+require "models/cell"
 
 module Gol2
   def self.running?

@@ -83,6 +83,8 @@ Worklog
     - basic game loop strategy implemented
 
   1/01/2015
+  - 3:00 Data structure
+   - cells
 
 
 
