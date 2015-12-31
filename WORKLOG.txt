@@ -56,6 +56,35 @@ Worklog
     - added gemset and ruby version
     - decided to update to ruby 2.3.4
     - bundler/rspec/ruby-version/ruby-gemset
-  - 4:10 (started first test)
+    - using gemstash (just wanted to have an excuse to use it)
+    - moved auto-generated rspec test to mirror location in code
+  - 4:45 Spiking Concepts
+    - parent/child process communications
+    - since this is an interest of mine I took far more time looking into this than I would have when doing a normal
+      test.  I spent a lot of time looking to further my own understanding of forking and inter-process communications
+      communications. However, I treated this like a spike to explore the viability of a specific solution and thought
+      it would be a good thing to show how I approached this spike
+      - testing child processes is always a challenge. I have done this previously by using IO pipes and
+        listening for messages. This time I wanted to try out some different approaches and test using sockets
+        instead of pipes. I wanted to see if I could make the asynchronous nature of testing child processes
+        simpler. I wanted to have a solution that would work on Windows too.
+      - I first explored the read/write using pipes as I was familiar with them
+      - I dug deep into Process module and read a number of articles on the web, including this particularly useful
+        one: http://allenlsy.com/working-with-unix-process-in-ruby/
+      - able to set up a non-blocking wait and a trap for child exit (might not work in windows)
+      - I spent plenty of time digging into the code and testing various things to determine how they worked and
+        if I could get more out of it. For instance, trapping for the child exit allowed me to reliably control
+        knowing when a child process was running or not and is cleaner than doing some of the other methods that rely
+        on exception handling to see if a child process is currently running.
+      - Spawn is an interesting possibility but couldn't determine useful benefit over forking, so put it aside for now.
+        I should probably explore it in greater detail
+      - Sockets may be better than pipes for windows compatibility.
+  - 8:20 breaking off spike...will use sockets and fork with no-blocking wait with trap for child process exiting.
+    - basic game loop strategy implemented
+
+  1/01/2015
+
+
+
 
 
