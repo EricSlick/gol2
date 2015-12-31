@@ -1,0 +1,60 @@
+Worklog
+Eric Slick
+
+Project: Game of Life 2
+
+Note: Since I did this test three years ago, I decided that just re-submitting the old code was insufficient and have
+      re-implemented with the main goal of showing how my skills have improved over the last three years. Because I'm
+      expanding the goals of the normal test, I expect it to take me longer than usual. I've created a rough timeline
+      of when I started and when I finished along with notes on what I was doing, researching, thinking, etc.
+
+Goals:
+ Implementation
+   - recreate a cleaner and more efficient version of GOL compared with the last submission
+   - add one or two new features to give a twist on the basic "game" by giving it a gaming twist of some sort.
+   - improve on the visual aspects of the last version.
+   - improve the UI
+   - more efficient memory handling (IE, reduce GC activity)
+     - perhaps tweak the GC settings
+   - a more efficient runtime
+
+ Testing
+   - Use TDD
+   - Add a BDD aspect using rspec without Cucumber (an alternative approach to creating BDD tests I used based on
+       a fellow developer's thoughts and ideas on a cleaner (and more limited) approach to integration/bdd type testing.
+
+Design
+ Base
+   - Implement Conway's Game of Life
+ Extended
+   - Implement competing cell groups (evolve the cells and implement some sort of attraction to keep them grouped
+   - UI allows for realtime tweaks to the GOL and allow player competition against the computer
+
+Tools
+  - RubyMine 8.0.2
+  - Ruby 2.3.4
+  - rvm
+  - git 2.6.3
+
+---
+
+Worklog
+
+12/29/2015
+3:00 - 3:30 (ish)
+  - after chatting with Shelly, looked up old code, and decided to re-implement rather than just improve.
+  - pulled down and looked over old code
+  - thought through some ideas on what I could do to improve on it
+
+12/30/2015
+  - morning
+    - briefly set up project as a gem using bundler
+  - break (family and holiday stuff)
+    - Thinking about what I could do to extend the design of GOL that was reasonable to do in a short timeframe
+  - 3:30 (setup)
+    - set up this worklog.txt and created a basic goal and put down extended design ideas
+    - added gemset and ruby version
+    - decided to update to ruby 2.3.4
+    - bundler/rspec
+  - 4:10 (started first test)
+
