@@ -55,6 +55,7 @@ Worklog
     - set up this worklog.txt and created a basic goal and put down extended design ideas
     - added gemset and ruby version
     - decided to update to ruby 2.3.4
-    - bundler/rspec
+    - bundler/rspec/ruby-version/ruby-gemset
   - 4:10 (started first test)
+
 
