@@ -103,7 +103,6 @@ describe Gol2::Cell do
           exit if index == 3
         end
       end
-
     end
     
     context "Cell dies from over-population" do
@@ -118,8 +117,15 @@ describe Gol2::Cell do
       end
     end
 
-    context "Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction." do
-
+    context "Birthing a cell" do
+      # triangle row corner disconnected
+      #   *  ***  *      *
+      #  *#*  #  #*  #*   #
+      #           *  **   * *
+      #
+      it 'when an empty location has exactly three live cells as neighbors' do
+        #stop to consider how to handle empty cells
+      end
     end
 
   end
