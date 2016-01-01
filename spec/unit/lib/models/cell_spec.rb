@@ -92,32 +92,18 @@ describe Gol2::Cell do
     end
     
     context "Cell lives on to the next generation with adequate population." do
-      it 'when cell has two neighbors' do
-        neighbors.each do |key, neighbor_a|
-          neighbors.each do |key, neighbor_b|
-            cell.reset
-            cell.add_neighbor(key, neighbor_a)
-            cell.add_neighbor(key, neighbor_b)
-            cell.generate
-            expect(cell.alive?).to eq true
-          end
+      it 'when cell has two or three neighbors' do
+        index = 1
+        neighbors.each do |key, neighbor|
+          cell.alive = true
+          cell.add_neighbor(key, neighbor)
+          cell.generate
+          expect(cell.alive?).to eq true if index > 1
+          index += 1
+          exit if index == 3
         end
       end
 
-      it 'when cell has three neighbors' do
-        neighbors.each do |key, neighbor_a|
-          neighbors.each do |key, neighbor_b|
-            neighbors.each do |key, neighbor_c|
-              cell.reset
-              cell.add_neighbor(key, neighbor_a)
-              cell.add_neighbor(key, neighbor_b)
-              cell.add_neighbor(key, neighbor_c)
-              cell.generate
-              expect(cell.alive?).to eq true
-            end
-          end
-        end
-      end
     end
     
     context "Cell dies from over-population" do
@@ -130,109 +116,8 @@ describe Gol2::Cell do
           expect(cell.alive?).to eq false if index > 3
         end
       end
-
-      it "when it has five live neighbours" do
-        neighbors.each do |key, neighbor_1|
-          neighbors.each do |key, neighbor_2|
-            neighbors.each do |key, neighbor_3|
-              neighbors.each do |key, neighbor_4|
-                neighbors.each do |key, neighbor_5|
-                  cell.reset
-                  cell.add_neighbor(key, neighbor_1)
-                  cell.add_neighbor(key, neighbor_2)
-                  cell.add_neighbor(key, neighbor_3)
-                  cell.add_neighbor(key, neighbor_4)
-                  cell.add_neighbor(key, neighbor_5)
-                  cell.generate
-                  expect(cell.alive?).to eq false
-                end
-              end
-            end
-          end
-        end
-      end
-
-      it "when it has six live neighbours" do
-        neighbors.each do |key, neighbor_1|
-          neighbors.each do |key, neighbor_2|
-            neighbors.each do |key, neighbor_3|
-              neighbors.each do |key, neighbor_4|
-                neighbors.each do |key, neighbor_5|
-                  neighbors.each do |key, neighbor_6|
-                    cell.reset
-                    cell.add_neighbor(key, neighbor_1)
-                    cell.add_neighbor(key, neighbor_2)
-                    cell.add_neighbor(key, neighbor_3)
-                    cell.add_neighbor(key, neighbor_4)
-                    cell.add_neighbor(key, neighbor_5)
-                    cell.add_neighbor(key, neighbor_6)
-                    cell.generate
-                    expect(cell.alive?).to eq false
-                  end
-                end
-              end
-            end
-          end
-        end
-      end
-
-      it "when it has seven live neighbours" do
-        neighbors.each do |key, neighbor_1|
-          neighbors.each do |key, neighbor_2|
-            neighbors.each do |key, neighbor_3|
-              neighbors.each do |key, neighbor_4|
-                neighbors.each do |key, neighbor_5|
-                  neighbors.each do |key, neighbor_6|
-                    neighbors.each do |key, neighbor_7|
-                      cell.reset
-                      cell.add_neighbor(key, neighbor_1)
-                      cell.add_neighbor(key, neighbor_2)
-                      cell.add_neighbor(key, neighbor_3)
-                      cell.add_neighbor(key, neighbor_4)
-                      cell.add_neighbor(key, neighbor_5)
-                      cell.add_neighbor(key, neighbor_6)
-                      cell.add_neighbor(key, neighbor_7)
-                      cell.generate
-                      expect(cell.alive?).to eq false
-                    end
-                  end
-                end
-              end
-            end
-          end
-        end
-      end
-      
-      it "when it has eight live neighbours" do
-        neighbors.each do |key, neighbor_1|
-          neighbors.each do |key, neighbor_2|
-            neighbors.each do |key, neighbor_3|
-              neighbors.each do |key, neighbor_4|
-                neighbors.each do |key, neighbor_5|
-                  neighbors.each do |key, neighbor_6|
-                    neighbors.each do |key, neighbor_7|
-                      neighbors.each do |key, neighbor_8|
-                        cell.reset
-                        cell.add_neighbor(key, neighbor_1)
-                        cell.add_neighbor(key, neighbor_2)
-                        cell.add_neighbor(key, neighbor_3)
-                        cell.add_neighbor(key, neighbor_4)
-                        cell.add_neighbor(key, neighbor_5)
-                        cell.add_neighbor(key, neighbor_6)
-                        cell.add_neighbor(key, neighbor_7)
-                        cell.add_neighbor(key, neighbor_8)
-                        cell.generate
-                        expect(cell.alive?).to eq false
-                      end
-                    end
-                  end
-                end
-              end
-            end
-          end
-        end
-      end
     end
+
     context "Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction." do
 
     end
