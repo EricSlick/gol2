@@ -4,6 +4,8 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'gol2/version'
 require 'gol2.rb'
+PRYING = ENV['PRYING'] || false
+require 'pry' if PRYING
 
 Gem::Specification.new do |spec|
   spec.name          = "gol2"

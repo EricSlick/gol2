@@ -96,17 +96,23 @@ Worklog
 
   1/01/2015
   - 3:00 - 4:30 Data structure
-   - cells and their behavior
-   - stopped when considering birthing of a cell to consider how to approach it. I expect to have a cell at every
-     compass point of every live cell. "Dead" cells will track their neighbors just like live cells but be recycled
-     when they have 0 neighbors
-   - optimization: will re-use cells instead of constantly creating and destroying them. create as needed but never
-     destroy them once created.
-     there will be two cell groups...assigned and available for use. When adding a new cell, it will pull from
-     the available group first but create a new cell if one isn't available. cells will be removed from assigned (active)
-     group when they have 0 cells.
-   - each cell will know how many neighbors it has and what object in each compass direction (alive or dead).
-   - each cell will handle informing neighbor cells when it's status has changed (ie died or birthed)
+    - cells and their behavior
+    - stopped when considering birthing of a cell to consider how to approach it. I expect to have a cell at every
+      compass point of every live cell. "Dead" cells will track their neighbors just like live cells but be recycled
+      when they have 0 neighbors
+    - optimization: will re-use cells instead of constantly creating and destroying them. create as needed but never
+      destroy them once created.
+      there will be two cell groups...assigned and available for use. When adding a new cell, it will pull from
+      the available group first but create a new cell if one isn't available. cells will be removed from assigned (active)
+      group when they have 0 cells.
+    - each cell will know how many neighbors it has and what object in each compass direction (alive or dead).
+    - each cell will handle informing neighbor cells when it's status has changed (ie died or birthed)
+
+  1/02/2015
+    - 4:15 -  Full cell definition and rules
+      - every live cell has all cells defined around it (alive or dead)
+
+
 
 
 

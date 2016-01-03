@@ -1,10 +1,24 @@
 module Gol2
   class Cell
     attr_accessor :x_loc, :y_loc
-    attr_accessor :neighbors, :n_neighbor, :ne_neighbor, :e_neighbor, :se_neighbor, :s_neighbor, :sw_neighbor, :w_neighbor, :nw_neighbor
+    attr_accessor :all_neighbors, :live_neighbors
     attr_accessor :generation, :alive
 
-    def initialize
+    OPPOSITE_POINTS = {
+        n: :s,
+        ne: :sw,
+        e: :w,
+        se: :nw,
+        s: :n,
+        sw: :ne,
+        w: :e,
+        nw: :se
+    }
+
+    def initialize(alive = false)
+      self.alive = alive
+      self.all_neighbors = {}
+      self.live_neighbors = {}
       reset
     end
 
@@ -18,32 +32,41 @@ module Gol2
     end
 
     def next_generation
-      if self.neighbors < 2 || self.neighbors > 3
+      if self.live_neighbors.length < 2 || self.live_neighbors.length > 3
         self.alive = false
       end
     end
 
+    def link_back(compass_point, cell)
+      add_neighbor(OPPOSITE_POINTS[compass_point], cell)
+    end
+
     def add_neighbor(compass_point, cell)
-      position = "#{compass_point}_neighbor".to_sym
-      # current_cell = self.send(position)
-      self.send("#{position}=", cell)
-      self.neighbors += 1
+      if !all_neighbors[compass_point]
+        all_neighbors[compass_point] = cell
+        live_neighbors[compass_point] = cell if cell.alive?
+        cell.link_back(compass_point, self) if self.alive?
+      else
+        raise "Can't add neighbor when one is already set."
+      end
+    end
+
+    def back_link_cell(compass_point)
+      self.all_neighbors[OPPOSITE_POINTS[compass_point]]
     end
 
     def reset
       self.x_loc = 0
       self.y_loc = 0
       self.generation = 1
-      self.alive = true
-      self.neighbors = 0
-      self.n_neighbor = nil
-      self.ne_neighbor = nil
-      self.e_neighbor = nil
-      self.se_neighbor = nil
-      self.s_neighbor = nil
-      self.nw_neighbor = nil
-      self.w_neighbor = nil
+      self.add_neighbor(:n, Gol2::Cell.new) if self.alive?
+      self.add_neighbor(:ne, Gol2::Cell.new) if self.alive?
+      self.add_neighbor(:e, Gol2::Cell.new) if self.alive?
+      self.add_neighbor(:se, Gol2::Cell.new) if self.alive?
+      self.add_neighbor(:s, Gol2::Cell.new) if self.alive?
+      self.add_neighbor(:sw, Gol2::Cell.new) if self.alive?
+      self.add_neighbor(:w, Gol2::Cell.new) if self.alive?
+      self.add_neighbor(:nw, Gol2::Cell.new) if self.alive?
     end
-
   end
 end
