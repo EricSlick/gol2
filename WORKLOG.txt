@@ -117,6 +117,10 @@ Worklog
     - 4:30
       - Finished refactor and basic GOL rules
       - Added Gosu gem for visualization on a computer screen
+      - major problems getting Gosu to install
+        - needed to uninstall rvm, install brew, then re-install rvm, so brew was in its default location
+        - brew install sdl2
+        - then was able to install the gosu gem.
 
 
 
