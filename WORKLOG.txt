@@ -121,6 +121,22 @@ Worklog
         - needed to uninstall rvm, install brew, then re-install rvm, so brew was in its default location
         - brew install sdl2
         - then was able to install the gosu gem.
+        - now a segmentation fault issue
+  1/04/2015
+    - rspec is causing the segementation fault
+    - trying other rails versions bundle fails with a chicken/egg problem with gosu being required before it's installed
+      but this isn't the case under 2.2.4 ... beginning to regret writing this as a gem. Lots of unexpected issues eating
+      up time. Will try to resolve, but may have to abandon gem approach and do as a standalone app.
+      Gemstash was causing some of the issues and rspec just won't play well with gosu in some contexts, and it seems
+      ruby 2.1 and 2.2.3 has chicken/egg issues when bundling with gosu
+      ruby 2.2.4 is having seg faults
+      ruby 2.0 is working OK, so dropping down to it for now.
+
+
+
+
+
+
 
 
 
