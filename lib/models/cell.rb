@@ -19,8 +19,19 @@ module Gol2
       self.alive = alive
       self.all_neighbors = {}
       self.live_neighbors = {}
-      reset
+      self.x_loc = 0
+      self.y_loc = 0
+      self.generation = 1
+      give_birth if self.alive?
     end
+
+    def alive?
+      self.alive
+    end
+
+    #
+    # GOL Rules for Cell
+    #
 
     def generate
       if self.alive?
@@ -28,11 +39,6 @@ module Gol2
       else
         check_fertility
       end
-
-    end
-
-    def alive?
-      self.alive
     end
 
     def next_generation
@@ -58,6 +64,10 @@ module Gol2
       end
     end
 
+    #
+    # neighbor and link management
+    #
+
     def link_back(compass_point, cell)
       add_neighbor(COMPASS_POINTS[compass_point], cell)
     end
@@ -74,13 +84,6 @@ module Gol2
 
     def back_link_cell(compass_point)
       self.all_neighbors[COMPASS_POINTS[compass_point]]
-    end
-
-    def reset
-      self.x_loc = 0
-      self.y_loc = 0
-      self.generation = 1
-      give_birth if self.alive?
     end
   end
 end
