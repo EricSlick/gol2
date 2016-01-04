@@ -111,6 +111,13 @@ Worklog
   1/02/2015
     - 4:15 -  Full cell definition and rules
       - every live cell has all cells defined around it (alive or dead)
+      - refactored cells
+
+  1/03/2015
+    - 4:30
+      - Finished refactor and basic GOL rules
+      - Added Gosu gem for visualization on a computer screen
+
 
 
 
