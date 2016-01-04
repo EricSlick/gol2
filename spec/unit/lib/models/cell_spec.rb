@@ -15,9 +15,9 @@ describe Gol2::Cell do
         expect(cell.y_loc).to eq 25
       end
 
-      it '#generate can advance to a new generation' do
-        expect { cell.generate }.to change { cell.generation }.by(1)
-      end
+      # it '#generate can advance to a new generation' do
+      #   expect { cell.generate }.to change { cell.generation }.by(1)
+      # end
 
       it "OPPOSITE_POINTS constant can return the correct opposite compass point" do
         {
@@ -30,7 +30,7 @@ describe Gol2::Cell do
             w: :e,
             nw: :se,
         }.each do |k, v|
-          expect(Gol2::Cell::OPPOSITE_POINTS[k]).to eq v
+          expect(Gol2::Cell::COMPASS_POINTS[k]).to eq v
         end
       end
     end
@@ -82,25 +82,23 @@ describe Gol2::Cell do
 
   context 'given the basic game of life rules' do
     context "when a cell has no living neighbors" do
-      it 'it dies' do
+      it 'then it dies' do
         cell.generate
         expect(cell.alive?).to eq false
       end
     end
 
-
     context "when a cell has only one living neighbor" do
-      it 'it dies' do
+      it 'then it dies' do
         cell.all_neighbors[:n].alive = true
         cell.live_neighbors[:n] = cell.all_neighbors[:n]
         cell.generate
         expect(cell.alive?).to eq false
       end
-
     end
 
     context "when a cell has only two live neighbors" do
-      it 'it lives another generation' do
+      it 'then it lives another generation' do
         cell.all_neighbors[:ne].alive = true
         cell.all_neighbors[:e].alive = true
         cell.live_neighbors[:ne] = cell.all_neighbors[:ne]
@@ -111,7 +109,7 @@ describe Gol2::Cell do
     end
 
     context "when a cell has only three live neighbors" do
-      it 'it lives another generation' do
+      it 'then it lives another generation' do
         cell.all_neighbors[:ne].alive = true
         cell.all_neighbors[:e].alive = true
         cell.all_neighbors[:se].alive = true
@@ -123,8 +121,8 @@ describe Gol2::Cell do
       end
     end
 
-    context "Cell dies from over-population" do
-      it "when it has four or more live neighbours" do
+    context "when a cell had four or more live neighbors" do
+      it "then it dies due to over-population" do
         cell.all_neighbors[:ne].alive = true
         cell.all_neighbors[:e].alive = true
         cell.all_neighbors[:se].alive = true
@@ -138,14 +136,22 @@ describe Gol2::Cell do
       end
     end
 
-    context "Birthing a cell" do
+    context "when a dead cell has exactly three neighbors" do
       # triangle row corner disconnected
       #   *  ***  *      *
       #  *#*  #  #*  #*   #
       #           *  **   * *
       #
-      it 'when an empty location has exactly three live cell neighbors' do
-        #stop to consider how to handle empty cells
+      it 'then it becomes a living cell as if by birth' do
+        expect(dead_cell.alive?).to eq false
+        new_live_cell = Gol2::Cell.new(true)
+        dead_cell.add_neighbor(:ne, new_live_cell)
+        new_live_cell = Gol2::Cell.new(true)
+        dead_cell.add_neighbor(:e, new_live_cell)
+        new_live_cell = Gol2::Cell.new(true)
+        dead_cell.add_neighbor(:se, new_live_cell)
+        dead_cell.generate
+        expect(dead_cell.alive?).to eq true
       end
     end
 

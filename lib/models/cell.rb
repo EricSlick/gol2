@@ -4,7 +4,7 @@ module Gol2
     attr_accessor :all_neighbors, :live_neighbors
     attr_accessor :generation, :alive
 
-    OPPOSITE_POINTS = {
+    COMPASS_POINTS = {
         n: :s,
         ne: :sw,
         e: :w,
@@ -23,8 +23,12 @@ module Gol2
     end
 
     def generate
-      self.generation += 1
-      next_generation
+      if self.alive?
+        next_generation
+      else
+        check_fertility
+      end
+
     end
 
     def alive?
@@ -32,41 +36,51 @@ module Gol2
     end
 
     def next_generation
-      if self.live_neighbors.length < 2 || self.live_neighbors.length > 3
-        self.alive = false
+      self.generation += 1
+      case self.live_neighbors.length
+        when 2, 3
+        else
+          self.alive = false
+      end
+    end
+
+    def check_fertility
+      case self.live_neighbors.length
+        when 3
+          give_birth
+      end
+    end
+
+    def give_birth
+      self.alive = true
+      COMPASS_POINTS.each do |point, opposite_point|
+        self.add_neighbor(point)
       end
     end
 
     def link_back(compass_point, cell)
-      add_neighbor(OPPOSITE_POINTS[compass_point], cell)
+      add_neighbor(COMPASS_POINTS[compass_point], cell)
     end
 
-    def add_neighbor(compass_point, cell)
+    def add_neighbor(compass_point, cell = Gol2::Cell.new)
       if !all_neighbors[compass_point]
         all_neighbors[compass_point] = cell
         live_neighbors[compass_point] = cell if cell.alive?
         cell.link_back(compass_point, self) if self.alive?
       else
-        raise "Can't add neighbor when one is already set."
+        # raise "Can't add neighbor when one is already set."
       end
     end
 
     def back_link_cell(compass_point)
-      self.all_neighbors[OPPOSITE_POINTS[compass_point]]
+      self.all_neighbors[COMPASS_POINTS[compass_point]]
     end
 
     def reset
       self.x_loc = 0
       self.y_loc = 0
       self.generation = 1
-      self.add_neighbor(:n, Gol2::Cell.new) if self.alive?
-      self.add_neighbor(:ne, Gol2::Cell.new) if self.alive?
-      self.add_neighbor(:e, Gol2::Cell.new) if self.alive?
-      self.add_neighbor(:se, Gol2::Cell.new) if self.alive?
-      self.add_neighbor(:s, Gol2::Cell.new) if self.alive?
-      self.add_neighbor(:sw, Gol2::Cell.new) if self.alive?
-      self.add_neighbor(:w, Gol2::Cell.new) if self.alive?
-      self.add_neighbor(:nw, Gol2::Cell.new) if self.alive?
+      give_birth if self.alive?
     end
   end
 end
