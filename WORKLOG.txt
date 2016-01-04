@@ -3,16 +3,14 @@ Eric Slick
 
 Project: Game of Life 2
 
-Note: Since I did this test three years ago, I decided that just re-submitting the old code was insufficient and have
-      re-implemented with the main goal of showing how my skills have improved over the last three years. Because I'm
-      expanding the goals of the normal test, I expect it to take me longer than usual. I've created a rough timeline
-      of when I started and when I finished along with notes on what I was doing, researching, thinking, etc.
+Note: Since I did this test three years ago, I decided that just re-submitting the old code was insufficient and I wanted
+      to make something more than just the GOL, so I wanted to do the following to show something "better"
 
 Goals:
  Implementation
    - recreate a cleaner and more efficient version of GOL compared with the last submission
-   - first re-create the classic GOL...then
-   - add one or two new features to give a twist on the basic "game"
+   - implemented classic GOL visualized, but also...
+   - add one or two new features to give a twist on the basic "game" revolving around this type of thing...
      - colonies
        - colonies that compete with other colonies
      - game
@@ -26,14 +24,10 @@ Goals:
        - player and ai can make decisions on how to level up their colony
    - improve on the visual aspects of the last version.
    - improve the UI
-   - more efficient memory handling (IE, reduce GC activity)
-     - perhaps tweak the GC settings
-   - a more efficient runtime
 
  Testing
-   - Use TDD
-   - Add a BDD aspect using rspec without Cucumber (an alternative approach to creating BDD tests I used based on
-       a fellow developer's thoughts and ideas on a cleaner (and more limited) approach to integration/bdd type testing.
+   - Use TDD with a BDD(ish) twist using rspec without a formal BDD tool
+       note: this was inspired by a fellow programmer a couple years ago and thought to try it out again here.
 
 Design
  Base
@@ -44,7 +38,7 @@ Design
 
 Tools
   - RubyMine 8.0.2
-  - Ruby 2.3.4
+  - Ruby 2.3.4 [edit changed to 2.0.0 due to issues noted below)
   - rvm
   - git 2.6.3
 
@@ -53,84 +47,66 @@ Tools
 Worklog
 
 12/29/2015
-3:00 - 3:30 (ish)
-  - after chatting with Shelly, looked up old code, and decided to re-implement rather than just improve.
-  - pulled down and looked over old code
-  - thought through some ideas on what I could do to improve on it
+  - thought through some ideas on what I could do to improve on old test
 
 12/30/2015
-  - morning
-    - briefly set up project as a gem using bundler
-  - break (family and holiday stuff)
-    - Thinking about what I could do to extend the design of GOL that was reasonable to do in a short timeframe
-  - 3:30 (setup)
-    - set up this worklog.txt and created a basic goal and put down extended design ideas
-    - added gemset and ruby version
-    - decided to update to ruby 2.3.4
-    - bundler/rspec/ruby-version/ruby-gemset
-    - using gemstash (just wanted to have an excuse to use it)
-    - moved auto-generated rspec test to mirror location in code
-  - 4:45 Spiking Concepts
-    - parent/child process communications
+  setup, prep and spiking
+    - tried out gemstash (later removed due to potential issues as that it added no value to this project)
+  - 4:45 Spiking Concepts (TL;DR stuff)
+    - wanted to have a gem that could spawn multiple copies of the GOL
+    - forking and communication with the fork
     - since this is an interest of mine I took far more time looking into this than I would have when doing a normal
       test.  I spent a lot of time looking to further my own understanding of forking and inter-process communications
       communications. However, I treated this like a spike to explore the viability of a specific solution and thought
       it would be a good thing to show how I approached this spike
-      - testing child processes is always a challenge. I have done this previously by using IO pipes and
-        listening for messages. This time I wanted to try out some different approaches and test using sockets
-        instead of pipes. I wanted to see if I could make the asynchronous nature of testing child processes
-        simpler. I wanted to have a solution that would work on Windows too.
-      - I first explored the read/write using pipes as I was familiar with them
+      - basically, I just explored the various ways to do this: threading, forking, spawning, etc.
+      - I considered the process to process communications that would be necessary
+        - pipes, sockets, shared file, even redis
+        - sockets seems to be superior to pipes with regards to Windows.
       - I dug deep into Process module and read a number of articles on the web, including this particularly useful
         one: http://allenlsy.com/working-with-unix-process-in-ruby/
-      - able to set up a non-blocking wait and a trap for child exit (might not work in windows)
-      - I spent plenty of time digging into the code and testing various things to determine how they worked and
-        if I could get more out of it. For instance, trapping for the child exit allowed me to reliably control
-        knowing when a child process was running or not and is cleaner than doing some of the other methods that rely
-        on exception handling to see if a child process is currently running.
-      - Spawn is an interesting possibility but couldn't determine useful benefit over forking, so put it aside for now.
-        I should probably explore it in greater detail
-      - Sockets may be better than pipes for windows compatibility.
-  - 8:20 breaking off spike...will use sockets and fork with no-blocking wait with trap for child process exiting.
-    - basic game loop strategy implemented
+      - Being able to set up a no-blocking child forks was a big win over simplifying controlling child processes safely
+        since detaching them would make it necessary to implement more complicated coordination to ensure all processes
+        exited safely
+      - Spawn is worth future consideration.
+
 
   1/01/2015
-  - 3:00 - 4:30 Data structure
-    - cells and their behavior
-    - stopped when considering birthing of a cell to consider how to approach it. I expect to have a cell at every
-      compass point of every live cell. "Dead" cells will track their neighbors just like live cells but be recycled
-      when they have 0 neighbors
-    - optimization: will re-use cells instead of constantly creating and destroying them. create as needed but never
-      destroy them once created.
-      there will be two cell groups...assigned and available for use. When adding a new cell, it will pull from
-      the available group first but create a new cell if one isn't available. cells will be removed from assigned (active)
-      group when they have 0 cells.
-    - each cell will know how many neighbors it has and what object in each compass direction (alive or dead).
-    - each cell will handle informing neighbor cells when it's status has changed (ie died or birthed)
+  - Started with the Data structure
+    - cells and their behaviors
+    - did the easy stuff first, then stopped to consider the implications for "birthing" new cells
+    - decided that every live cell would have all cells surrounding it defined but that "dead" cells wouldn't
+      - this allows me to let every "live" cell know it's state without having to loop through all attached
+        cells
+      - I chose to base a cell on a single "pixel" instead of using a technique like hashlife since I wanted
+        to add new/extended behavior's to each cell and that would explode the complexity of the hashlife approach.
+    - I chose to use view the board as a grid like last time, but I would rather try implementing it without a grid
+      which I think would add some interesting possibilities. Nearby cells would be based on distance rather than
+      an 8 compass grid.  But for simplicity and to maintain some control over this project, grids is the way I went
+    - I chose to create cells only when needed and never destroy (but recycle) them to reduce the load on the GC
 
   1/02/2015
-    - 4:15 -  Full cell definition and rules
+    - finished cell structure at this point
       - every live cell has all cells defined around it (alive or dead)
-      - refactored cells
+      - refactored cells significantly at this point
 
   1/03/2015
-    - 4:30
-      - Finished refactor and basic GOL rules
-      - Added Gosu gem for visualization on a computer screen
+    - Finished up Cell refactor and basic GOL rules
+    - With data structure finished, I decided to create the game from this point from the user's perspective
+    - Researched 2D graphics gems and it came down to Gosu again and a new one ruby2d.
+      - ruby2d offers some interesting possibilities but had issues installing it successfully
+      - gosu proved problematic too
+      - spent a great deal of time trying to get either of these gems to work.
+    - Added Gosu gem for visualization on a computer screen
       - major problems getting Gosu to install
         - needed to uninstall rvm, install brew, then re-install rvm, so brew was in its default location
         - brew install sdl2
         - then was able to install the gosu gem.
         - now a segmentation fault issue
   1/04/2015
-    - rspec is causing the segementation fault
-    - trying other rails versions bundle fails with a chicken/egg problem with gosu being required before it's installed
-      but this isn't the case under 2.2.4 ... beginning to regret writing this as a gem. Lots of unexpected issues eating
-      up time. Will try to resolve, but may have to abandon gem approach and do as a standalone app.
-      Gemstash was causing some of the issues and rspec just won't play well with gosu in some contexts, and it seems
-      ruby 2.1 and 2.2.3 has chicken/egg issues when bundling with gosu
-      ruby 2.2.4 is having seg faults
-      ruby 2.0 is working OK, so dropping down to it for now.
+    - I finally figured out that bundler,rspec 3, gosu, gemstash(maybe) and ruby 2.1.x and 2.2.x simply didn't play
+      well together: seg faults, inability to bundle.
+    - ruby 2.0 did the trick, removed gemstash as it was not adding anything anyway, just something fun to play with.
 
 
 
