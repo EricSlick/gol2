@@ -15,9 +15,9 @@ describe Gol2::Cell do
         expect(cell.y_loc).to eq 25
       end
 
-      # it '#generate can advance to a new generation' do
-      #   expect { cell.generate }.to change { cell.generation }.by(1)
-      # end
+      it '#generate can advance to a new generation' do
+        expect { cell.generate }.to change { cell.generation }.by(1)
+      end
 
       it "OPPOSITE_POINTS constant can return the correct opposite compass point" do
         {
