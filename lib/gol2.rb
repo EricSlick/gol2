@@ -1,6 +1,6 @@
 require "gol2/version"
 require "models/cell"
-require "game/game"
+require "game/game_controller"
 require "visualization/game_window"
 
 module Gol2
@@ -20,7 +20,7 @@ module Gol2
       @read_from_fork.close
       @write_to_fork.close
 
-      game = Gol2::Game.new
+      game = Gol2::GameController
       game.run
 
       # trap(:CLD) below is called when this child fork ends.

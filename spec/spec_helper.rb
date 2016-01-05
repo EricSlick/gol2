@@ -1,1 +1,1 @@
-Gol2::Game.testing = true
+Gol2::GameController.testing = true

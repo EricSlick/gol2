@@ -16,7 +16,7 @@ module Gol2
     }
 
     def initialize(alive = false)
-      self.alive = alive
+      self.alive = (alive == true || alive == :true || alive == :alive)
       self.all_neighbors = {}
       self.live_neighbors = {}
       self.x_loc = 0
@@ -72,12 +72,14 @@ module Gol2
       add_neighbor(COMPASS_POINTS[compass_point], cell)
     end
 
-    def add_neighbor(compass_point, cell = Gol2::Cell.new)
+    def add_neighbor(compass_point, cell = nil)
+      cell ||= Gol2::GameController.fetch_new_cell()
       if !all_neighbors[compass_point]
         all_neighbors[compass_point] = cell
         live_neighbors[compass_point] = cell if cell.alive?
         cell.link_back(compass_point, self) if self.alive?
       else
+        # todo: decide if this is an error condition or not. should this be ignored or handled differently?
         # raise "Can't add neighbor when one is already set."
       end
     end

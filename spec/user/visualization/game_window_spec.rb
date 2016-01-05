@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Gol2::GameWindow do
   let(:gol2_window) { Gol2::GameWindow.new }
 
-  it 'can create a game window' do
+  it 'can create a gosu window' do
     expect(gol2_window.methods).to include(:show, :update, :draw)
   end
 
