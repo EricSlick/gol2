@@ -1,1 +1,1 @@
-Gol2::GameController.testing = true
+Gol2::GameController.skip_visualization = true

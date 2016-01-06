@@ -13,7 +13,7 @@ describe "Given a #{Gol2::GameController.name} class" do
   end
 
   it 'can run the game' do
-    gol2_controller.testing = true
+    gol2_controller.skip_visualization = true
     expect(gol2_controller.run).to eq true
   end
 
@@ -41,7 +41,7 @@ describe "Given a #{Gol2::GameController.name} class" do
   context 'when obtaining a cell' do
     context 'by creating one at a specific location' do
       it '#create_a_cell_at returns a cell' do
-        cell = gol2_controller.send(:create_cell_at, 200, 201)
+        cell = gol2_controller.send(:create_seed_cell_at, 200, 201)
         expect(cell).to_not be nil
       end
     end
@@ -49,13 +49,13 @@ describe "Given a #{Gol2::GameController.name} class" do
     context 'by fetching a cell' do
       context '#fetch_a_cell_for another cell' do
         it 'returns a cell' do
-          cell = gol2_controller.send(:create_cell_at, 200, 201)
+          cell = gol2_controller.send(:create_seed_cell_at, 200, 201)
           fetched_cell = gol2_controller.fetch_a_cell_for(cell, :n)
           expect(fetched_cell).to_not be_nil
         end
 
         it 'returns a cell at a valid x/y coordinate' do
-          cell = gol2_controller.send(:create_cell_at, 200, 201)
+          cell = gol2_controller.send(:create_seed_cell_at, 200, 201)
           fetched_cell = gol2_controller.fetch_a_cell_for(cell, :n)
           expect(fetched_cell.x_loc).to eq 200
           expect(fetched_cell.y_loc).to eq 200
@@ -82,7 +82,7 @@ describe "Given a #{Gol2::GameController.name} class" do
 
   context 'when a cell is living' do
     it '#create_surrounding_cells_for will ensure there are active cells surrounding it' do
-      cell = gol2_controller.create_cell_at(100, 100)
+      cell = gol2_controller.create_seed_cell_at(100, 100)
       gol2_controller.create_surrounding_cells_for(cell)
       expect(cell.all_neighbors.length).to eq 8
     end

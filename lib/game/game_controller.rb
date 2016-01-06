@@ -39,14 +39,15 @@ module Gol2
     }
 
     class << self
-      attr_accessor :testing
+      attr_accessor :skip_visualization
       attr_accessor :game_window, :active_cells, :reserve_cells, :game_options, :custom_options
       attr_accessor :game_width, :game_height, :window_width, :window_height
 
       def run(options = {})
         self.custom_options = options
         self.reset
-        unless self.testing
+        unless self.skip_visualization
+          self.seed_universe
           game_window = Gol2::GameWindow.new
           game_window.game_controller = self
           game_window.show
@@ -95,6 +96,9 @@ module Gol2
         fetched_cell
       end
 
+      #
+      # will either return existing or create a new cell
+      #
       def fetch_cell_at(fetch_key)
         fetched_cell = self.active_cells[fetch_key]
         if !fetched_cell
@@ -102,18 +106,15 @@ module Gol2
           fetched_cell.x_loc = fetch_key / KEY_OFFSET
           fetched_cell.y_loc = fetch_key % KEY_OFFSET
           self.active_cells[fetch_key] = fetched_cell
-        else
-          stophere = 0
-        end
-        if fetched_cell.nil?
-          stophere = 0
         end
         fetched_cell
       end
 
+      #
       # get a new cell at the x/y coordinates
-      # x/y must already refer to an empty location
-      def create_cell_at(new_x, new_y)
+      # used by seeding to create first seed of a group
+      #
+      def create_seed_cell_at(new_x, new_y)
         fetch_key = new_x * KEY_OFFSET + new_y
         cell = self.active_cells[fetch_key]
         raise "cannot create a cell at #{new_x}, #{new_y} as it's already occupied by one" if cell
@@ -143,7 +144,7 @@ module Gol2
             end
 
         location = get_empty_location(:center)
-        seed_cell = create_cell_at(location[:x], location[:y])
+        seed_cell = create_seed_cell_at(location[:x], location[:y])
         seed_cell.alive = true
         create_surrounding_cells_for(seed_cell)
 
