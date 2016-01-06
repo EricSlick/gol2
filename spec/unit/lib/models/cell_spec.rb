@@ -85,7 +85,7 @@ describe "Given a #{Gol2::Cell.name} class" do
 
       it 'then all neighbors are linked back to it' do
         cell.all_neighbors.each do |compass_point, linked_cell|
-          expect(linked_cell.back_link_cell(compass_point).object_id).to eq cell.object_id
+          expect(linked_cell.get_neighbor(compass_point).object_id).to eq cell.object_id
         end
       end
     end
@@ -172,12 +172,11 @@ describe "Given a #{Gol2::Cell.name} class" do
       #
       it 'then it becomes a living cell as if by birth' do
         expect(dead_cell.alive?).to eq false
+        dead_cell.add_neighbor(:ne)
         new_live_cell = Gol2::Cell.new(true)
-        dead_cell.add_neighbor(:ne, new_live_cell)
+        dead_cell.add_neighbor(:e)
         new_live_cell = Gol2::Cell.new(true)
-        dead_cell.add_neighbor(:e, new_live_cell)
-        new_live_cell = Gol2::Cell.new(true)
-        dead_cell.add_neighbor(:se, new_live_cell)
+        dead_cell.add_neighbor(:se)
         dead_cell.generate
         expect(dead_cell.alive?).to eq true
       end
