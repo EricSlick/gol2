@@ -29,6 +29,12 @@ describe "Given a #{Gol2::GameController.name} class" do
     expect(gol2_controller.game_width).to eq(Gol2::GameController::DEFAULT_OPTIONS[:game_width])
   end
 
+  it 'can return active_cells' do
+    expect(gol2_controller.active_cells).to eq({})
+    gol2_controller.active_cells = {1 => 'one', 2 => 'two'}
+    expect(gol2_controller.active_cells).to eq({1 => 'one', 2 => 'two'})
+  end
+
   context "when seeding the game board" do
     context "and location is specified as :center" do
       it 'then returns a location inside the center area' do
@@ -74,7 +80,6 @@ describe "Given a #{Gol2::GameController.name} class" do
           fetched_cell = gol2_controller.fetch_a_cell_for(cell, :w)
           expect(fetched_cell.x_loc).to eq 199
           expect(fetched_cell.y_loc).to eq 201
-
         end
       end
     end
@@ -88,6 +93,16 @@ describe "Given a #{Gol2::GameController.name} class" do
     end
   end
 
+  context 'when a cell dies' do
+    it '#move_cell_to_reserve if it has no living neighbors' do
+      cell = gol2_controller.create_seed_cell_at(100, 100)
+      expect(gol2_controller.reserve_cells.length).to eq 0
+      gol2_controller.move_cell_to_reserve(cell)
+      expect(gol2_controller.reserve_cells.length).to eq 1
+    end
+  end
+
+
   context 'when seeding' do
     it '#seed_viable_cell_group creates a group of cells capable of growing' do
       seed_cell = gol2_controller.send(:seed_viable_cell_group)
@@ -100,24 +115,14 @@ describe "Given a #{Gol2::GameController.name} class" do
       expect(gol2_controller.active_cells.length).to eq 9
       expect(gol2_controller.reserve_cells.length).to eq 0
     end
+
+    context 'and after one generation' do
+      it 'will have generated additional cells' do
+        gol2_controller.seed_universe(1, Gol2::GameController::SEED_TYPE[:random])
+        active_cells = gol2_controller.get_active_cells.length
+        gol2_controller.update_game
+        expect(gol2_controller.get_active_cells.length).to be > active_cells
+      end
+    end
   end
-
-  it 'can return a cell at a specific location' do
-
-  end
-
-  #
-  # notes
-  #
-
-  # number of cells created by a shape
-  #   19    15    15
-  #    ***  ***   ***
-  #   *o#*  o#o   o#o*
-  #  *o#o*  o#o   o##*
-  #  *#o*   o#o   *oo*
-  #  ***    ***
-
-
-
 end

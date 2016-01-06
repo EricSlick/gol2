@@ -2,7 +2,7 @@ module Gol2
   class Cell
     attr_accessor :x_loc, :y_loc
     attr_accessor :neighbor_keys
-    attr_accessor :cell_age, :alive, :alive_next
+    attr_accessor :cell_age, :alive, :alive_next, :key
 
     # xy is from upper left corner
     COMPASS_POINTS = {
@@ -35,22 +35,10 @@ module Gol2
       regenerate_neighbor_keys if self.x_loc
     end
 
-    def alive?
-      self.alive
-    end
-
-    def alive_next?
-      self.alive_next
-    end
-
-    #
-    # GOL Rules for Cell
-    #
-
     def live_life
       @lived_life = true
-      if self.alive?
-        prepare_cell
+      if self.alive
+        do_some_living
       else
         check_fertility
       end
@@ -58,11 +46,25 @@ module Gol2
 
     def age_cell
       raise "Can't age cell until it's lived its life (#live_life) first" if !@lived_life
-      self.alive = self.alive_next
+      if self.alive_next
+        if !self.alive
+          #cell just gave birth
+          self.alive = self.alive_next
+        end
+      else
+        if self.alive
+          #cell just died
+          self.alive = self.alive_next
+        end
+      end
       @life_lived = false
     end
 
-    def prepare_cell
+    #
+    # GOL Rules for Cell
+    #
+
+    def do_some_living
       self.cell_age += 1
       case self.live_neighbors.length
         when 2, 3
@@ -78,6 +80,9 @@ module Gol2
       end
     end
 
+    #
+    # a cell's neighborhood
+    #
     def live_neighbors
       neighbors = {}
       self.neighbor_keys.values.each do |key|
@@ -108,6 +113,7 @@ module Gol2
         self.neighbor_keys ||= {}
         self.neighbor_keys[cp] = (self.x_loc + xy[0]) * KEY_OFFSET + (self.y_loc + xy[1])
       end
+      self.key = (self.x_loc) * KEY_OFFSET + (self.y_loc)
     end
 
   end

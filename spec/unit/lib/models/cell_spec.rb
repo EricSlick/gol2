@@ -42,34 +42,34 @@ describe "Given a #{Gol2::Cell.name} class" do
     end
 
     it "is created dead by default" do
-      expect(Gol2::Cell.new.alive?).to be false
+      expect(Gol2::Cell.new.alive).to be false
     end
 
     context "with a boolean" do
       it "is instantiated alive" do
-        expect(Gol2::Cell.new(true).alive?).to be true
+        expect(Gol2::Cell.new(true).alive).to be true
       end
 
       it "is instantiated dead" do
-        expect(Gol2::Cell.new(false).alive?).to be false
+        expect(Gol2::Cell.new(false).alive).to be false
       end
     end
 
     context "with a symbol" do
       it "is instantiated alive using :true" do
-        expect(Gol2::Cell.new(:true).alive?).to be true
+        expect(Gol2::Cell.new(:true).alive).to be true
       end
 
       it "is instantiated alive using :alive" do
-        expect(Gol2::Cell.new(:alive).alive?).to be true
+        expect(Gol2::Cell.new(:alive).alive).to be true
       end
 
       it "is instantiated dead using :false" do
-        expect(Gol2::Cell.new(:false).alive?).to be false
+        expect(Gol2::Cell.new(:false).alive).to be false
       end
 
       it "is instantiated dead using :dead" do
-        expect(Gol2::Cell.new(:dead).alive?).to be false
+        expect(Gol2::Cell.new(:dead).alive).to be false
       end
     end
 
@@ -80,13 +80,13 @@ describe "Given a #{Gol2::Cell.name} class" do
 
     context 'and the cell is instantiated as alive' do
       it 'then it starts actually alive' do
-        expect(cell.alive?).to eq true
+        expect(cell.alive).to eq true
       end
     end
 
     context 'and the cell is instantiated as dead' do
       it 'then it is actually dead' do
-        expect(dead_cell.alive?).to eq false
+        expect(dead_cell.alive).to eq false
       end
     end
 
@@ -98,7 +98,7 @@ describe "Given a #{Gol2::Cell.name} class" do
         allow(cell).to receive(:live_neighbors).and_return({})
         cell.live_life
         cell.age_cell
-        expect(cell.alive?).to eq false
+        expect(cell.alive).to eq false
       end
     end
 
@@ -107,7 +107,7 @@ describe "Given a #{Gol2::Cell.name} class" do
         allow(cell).to receive(:live_neighbors).and_return({1 => nil})
         cell.live_life
         cell.age_cell
-        expect(cell.alive?).to eq false
+        expect(cell.alive).to eq false
       end
     end
 
@@ -116,7 +116,7 @@ describe "Given a #{Gol2::Cell.name} class" do
         allow(cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil})
         cell.live_life
         cell.age_cell
-        expect(cell.alive?).to eq true
+        expect(cell.alive).to eq true
       end
     end
 
@@ -125,7 +125,7 @@ describe "Given a #{Gol2::Cell.name} class" do
         allow(cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil, 3 => nil})
         cell.live_life
         cell.age_cell
-        expect(cell.alive?).to eq true
+        expect(cell.alive).to eq true
       end
     end
 
@@ -134,7 +134,7 @@ describe "Given a #{Gol2::Cell.name} class" do
         allow(cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil, 3 => nil, 4 => nil})
         cell.live_life
         cell.age_cell
-        expect(cell.alive?).to eq false
+        expect(cell.alive).to eq false
       end
     end
 
@@ -145,13 +145,13 @@ describe "Given a #{Gol2::Cell.name} class" do
       #           *  **   * *
       #
       it 'then it becomes a living cell as if by birth' do
-        expect(dead_cell.alive?).to eq false
+        expect(dead_cell.alive).to eq false
         allow(dead_cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil, 3 => nil})
         dead_cell.live_life
-        expect(dead_cell.alive_next?).to eq true
-        expect(dead_cell.alive?).to eq false
+        expect(dead_cell.alive_next).to eq true
+        expect(dead_cell.alive).to eq false
         dead_cell.age_cell
-        expect(dead_cell.alive?).to eq true
+        expect(dead_cell.alive).to eq true
       end
     end
 

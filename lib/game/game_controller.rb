@@ -41,18 +41,50 @@ module Gol2
     class << self
       attr_accessor :skip_visualization
       attr_accessor :game_window, :active_cells, :reserve_cells, :game_options, :custom_options
-      attr_accessor :game_width, :game_height, :window_width, :window_height
+      attr_accessor :game_width, :game_height, :window_width, :window_height, :generations
 
       def run(options = {})
         self.custom_options = options
         self.reset
         unless self.skip_visualization
           self.seed_universe
-          game_window = Gol2::GameWindow.new
-          game_window.game_controller = self
-          game_window.show
+          self.game_window = Gol2::GameWindow.new(options)
+          self.game_window.game_controller = self
+          self.game_window.show
         end
         true
+      end
+
+      def update_game
+        self.generations += 1
+        if self.active_cells
+          self.active_cells.each do |key, cell|
+            cell.live_life
+          end
+          new_living_cells = []
+          new_dead_cells = []
+          self.active_cells.each do |key, cell|
+            changed_life = cell.alive != cell.alive_next
+            cell.age_cell
+            if changed_life
+              if cell.alive
+                new_living_cells.push(cell)
+              else
+                new_dead_cells.push(cell)
+              end
+            end
+          end
+          new_living_cells.each do |cell|
+            create_surrounding_cells_for(cell)
+          end
+          new_dead_cells.each do |cell|
+            handle_funeral_for(cell)
+          end
+        end
+      end
+
+      def get_active_cells
+        self.active_cells || {}
       end
 
       def reset
@@ -64,6 +96,7 @@ module Gol2
         self.active_cells ||= {}
         self.active_cells.clear
         self.reserve_cells.clear
+        self.generations = 0
       end
 
       def seed_universe(seeds = 1, seed_type = SEED_TYPE[:random])
@@ -130,6 +163,18 @@ module Gol2
         end
       end
 
+      def handle_funeral_for(cell)
+        cell.all_neighbors.each do |key, n_cell|
+          move_cell_to_reserve(n_cell) if n_cell
+        end
+        move_cell_to_reserve(cell)
+      end
+
+      def move_cell_to_reserve(cell)
+        self.active_cells.delete(cell.key) if cell.live_neighbors.length == 0
+        self.reserve_cells.push(cell)
+      end
+
       private
 
       # a cell group that can replicate
@@ -146,11 +191,13 @@ module Gol2
         location = get_empty_location(:center)
         seed_cell = create_seed_cell_at(location[:x], location[:y])
         seed_cell.alive = true
+        seed_cell.alive_next = true
         create_surrounding_cells_for(seed_cell)
 
         seed_shape.each do |compass_point|
           next_cell = fetch_cell_at(seed_cell.get_neighbor_key(compass_point))
           next_cell.alive = true
+          seed_cell.alive_next = true
         end
 
         return seed_cell
