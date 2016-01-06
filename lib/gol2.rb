@@ -4,6 +4,31 @@ require "game/game_controller"
 require "visualization/game_window"
 
 module Gol2
+  KEY_OFFSET = 10000
+
+  # when given a compass point, return the offset from the current cell's location
+  X_OFFSET = {
+      n: 0,
+      s: 0,
+      nw: -1,
+      sw: -1,
+      w: -1,
+      ne: 1,
+      e: 1,
+      se: 1,
+  }
+
+  Y_OFFSET = {
+      n: -1,
+      nw: -1,
+      ne: -1,
+      w: 0,
+      e: 0,
+      s: 1,
+      sw: 1,
+      se: 1
+  }
+
   def self.running?
     @gol_running == true
   end
@@ -16,15 +41,14 @@ module Gol2
 
     @pid = fork do
       # fork doesn't read from or write to itself
-      @running = true
       @read_from_fork.close
       @write_to_fork.close
 
+      sleep 0.1
       game = Gol2::GameController
       game.run
 
       # trap(:CLD) below is called when this child fork ends.
-      sleep 0.1
     end
 
     # parent doesn't read from or write to itself
@@ -37,7 +61,6 @@ module Gol2
   def self.create_child_exit_trap
     # To ensure CLD will not call flush for #puts call
     $stdout.sync = true
-
     trap(:CLD) do  |x|
       @gol_running = false
       begin

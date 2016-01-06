@@ -2,11 +2,14 @@ require 'spec_helper'
 
 describe "Given a #{Gol2::Cell.name} class" do
 
-  let(:alive) { true }
-  let(:cell) { Gol2::Cell.new(alive) }
+  let(:cell) { Gol2::Cell.new(:alive) }
   let(:dead_cell) { Gol2::Cell.new }
 
   context "when instantiated" do
+    before :each do
+      allow(cell).to receive(:live_neighbors).and_return({1 => nil})
+    end
+
     it "#x/#y can change its x/y position" do
       cell.x_loc = 50
       cell.y_loc = 25
@@ -15,22 +18,27 @@ describe "Given a #{Gol2::Cell.name} class" do
     end
 
     it '#generate can advance to a new generation' do
-      expect { cell.generate }.to change { cell.generation }.by(1)
+      expect { cell.live_life }.to change { cell.cell_age }.by(1)
     end
 
-    it "OPPOSITE_POINTS constant can return the correct opposite compass point" do
+    it "COMPASS_POINTS return x/y offsets from cell position" do
       {
-          n: :s,
-          ne: :sw,
-          e: :w,
-          se: :nw,
-          s: :n,
-          sw: :ne,
-          w: :e,
-          nw: :se,
+          n: [0, -1],
+          ne: [1, -1],
+          e: [1, 0],
+          se: [1, 1],
+          s: [0, 1],
+          sw: [-1, 1],
+          w: [-1, 0],
+          nw: [-1, -1]
       }.each do |k, v|
         expect(Gol2::Cell::COMPASS_POINTS[k]).to eq v
       end
+    end
+
+    it "#get_neighbor_xy returns xy coords of specified position" do
+      expected_key = (cell.x_loc) * (Gol2::KEY_OFFSET) + (cell.y_loc) -1
+      expect(cell.get_neighbor_key(:n)).to eq(expected_key)
     end
 
     it "is created dead by default" do
@@ -65,10 +73,6 @@ describe "Given a #{Gol2::Cell.name} class" do
       end
     end
 
-    it "has neighbors" do
-      expect(cell.all_neighbors.length).to eq 8
-    end
-
     it "has an x/y coordinate" do
       expect(cell.x_loc).to eq 0
       expect(cell.y_loc).to eq 0
@@ -78,32 +82,12 @@ describe "Given a #{Gol2::Cell.name} class" do
       it 'then it starts actually alive' do
         expect(cell.alive?).to eq true
       end
-
-      it 'then all neighbors are defined' do
-        expect(cell.all_neighbors.length).to eq 8
-      end
-
-      it 'then all neighbors are linked back to it' do
-        cell.all_neighbors.each do |compass_point, linked_cell|
-          expect(linked_cell.get_neighbor(compass_point).object_id).to eq cell.object_id
-        end
-      end
     end
 
     context 'and the cell is instantiated as dead' do
       it 'then it is actually dead' do
         expect(dead_cell.alive?).to eq false
       end
-
-      it 'then it has no back-linked cells' do
-        expect(dead_cell.all_neighbors.length).to eq 0
-      end
-
-      #todo: can't have a dead cell with no live cells attached to it without it being in the dead pool
-      # it 'then it will be in the unassigned pool of cells' do
-      #   pending "when the game manager is created and this should move to that spec"
-      #   expect(true).to eq false
-      # end
     end
 
   end
@@ -111,55 +95,45 @@ describe "Given a #{Gol2::Cell.name} class" do
   context 'that implements the basic game of life rules' do
     context "when a cell has no living neighbors" do
       it 'then it dies' do
-        cell.generate
+        allow(cell).to receive(:live_neighbors).and_return({})
+        cell.live_life
+        cell.age_cell
         expect(cell.alive?).to eq false
       end
     end
 
     context "when a cell has only one living neighbor" do
       it 'then it dies' do
-        cell.all_neighbors[:n].alive = true
-        cell.live_neighbors[:n] = cell.all_neighbors[:n]
-        cell.generate
+        allow(cell).to receive(:live_neighbors).and_return({1 => nil})
+        cell.live_life
+        cell.age_cell
         expect(cell.alive?).to eq false
       end
     end
 
     context "when a cell has only two live neighbors" do
       it 'then it lives another generation' do
-        cell.all_neighbors[:ne].alive = true
-        cell.all_neighbors[:e].alive = true
-        cell.live_neighbors[:ne] = cell.all_neighbors[:ne]
-        cell.live_neighbors[:e] = cell.all_neighbors[:e]
-        cell.generate
+        allow(cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil})
+        cell.live_life
+        cell.age_cell
         expect(cell.alive?).to eq true
       end
     end
 
     context "when a cell has only three live neighbors" do
       it 'then it lives another generation' do
-        cell.all_neighbors[:ne].alive = true
-        cell.all_neighbors[:e].alive = true
-        cell.all_neighbors[:se].alive = true
-        cell.live_neighbors[:ne] = cell.all_neighbors[:ne]
-        cell.live_neighbors[:e] = cell.all_neighbors[:e]
-        cell.live_neighbors[:se] = cell.all_neighbors[:se]
-        cell.generate
+        allow(cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil, 3 => nil})
+        cell.live_life
+        cell.age_cell
         expect(cell.alive?).to eq true
       end
     end
 
     context "when a cell had four or more live neighbors" do
       it "then it dies due to over-population" do
-        cell.all_neighbors[:ne].alive = true
-        cell.all_neighbors[:e].alive = true
-        cell.all_neighbors[:se].alive = true
-        cell.all_neighbors[:s].alive = true
-        cell.live_neighbors[:ne] = cell.all_neighbors[:ne]
-        cell.live_neighbors[:e] = cell.all_neighbors[:e]
-        cell.live_neighbors[:se] = cell.all_neighbors[:se]
-        cell.live_neighbors[:s] = cell.all_neighbors[:s]
-        cell.generate
+        allow(cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil, 3 => nil, 4 => nil})
+        cell.live_life
+        cell.age_cell
         expect(cell.alive?).to eq false
       end
     end
@@ -172,12 +146,11 @@ describe "Given a #{Gol2::Cell.name} class" do
       #
       it 'then it becomes a living cell as if by birth' do
         expect(dead_cell.alive?).to eq false
-        dead_cell.add_neighbor(:ne)
-        new_live_cell = Gol2::Cell.new(true)
-        dead_cell.add_neighbor(:e)
-        new_live_cell = Gol2::Cell.new(true)
-        dead_cell.add_neighbor(:se)
-        dead_cell.generate
+        allow(dead_cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil, 3 => nil})
+        dead_cell.live_life
+        expect(dead_cell.alive_next?).to eq true
+        expect(dead_cell.alive?).to eq false
+        dead_cell.age_cell
         expect(dead_cell.alive?).to eq true
       end
     end
