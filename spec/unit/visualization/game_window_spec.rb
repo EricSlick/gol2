@@ -34,7 +34,8 @@ describe Gol2::GameWindow do
     end
 
     it 'updates update_clock' do
-      expect(gol2_window.update_clock). to eq(Gol2::GameWindow::UPDATE_DELAY)
+      gol2_window.update_clock = 12543
+      expect(gol2_window.update_clock). to eq(12543)
     end
   end
 
