@@ -4,7 +4,9 @@ Eric Slick
 Project: Game of Life 2
 
 Note: Since I did this test three years ago, I decided that just re-submitting the old code was insufficient and I wanted
-      to make something more than just the GOL, so I wanted to do the following to show something "better"
+      to make something more than just another simple GOL, so I worked out the following as potential ways to improve it.
+      As such, I committed to spending a significant amount of time to this to try and give you something additional to
+      look at.
 
 Goals:
  Implementation
@@ -27,7 +29,9 @@ Goals:
 
  Testing
    - Use TDD with a BDD(ish) twist using rspec without a formal BDD tool
-       note: this was inspired by a fellow programmer a couple years ago and thought to try it out again here.
+       note: this approach was inspired by a fellow programmer a couple years ago and thought to try it out again here.
+             I experimented with it, and the testing shows it as I evolved it over time. It's an experiment, after all
+             in trying a different twist on the standard testing approach.
 
 Design
  Base
@@ -46,67 +50,43 @@ Tools
 
 Worklog
 
-12/29/2015
-  - thought through some ideas on what I could do to improve on old test
+note: Since I wasn't doing this as a formal test, I used the time to pursue several avenues of approach. I committed to
+      doing a significant amount of time for this project as I wanted it to reflect
 
-12/30/2015
   setup, prep and spiking
-    - tried out gemstash (later removed due to potential issues as that it added no value to this project)
-  - 4:45 Spiking Concepts (TL;DR stuff)
-    - wanted to have a gem that could spawn multiple copies of the GOL
-    - forking and communication with the fork
-    - since this is an interest of mine I took far more time looking into this than I would have when doing a normal
-      test.  I spent a lot of time looking to further my own understanding of forking and inter-process communications
-      communications. However, I treated this like a spike to explore the viability of a specific solution and thought
-      it would be a good thing to show how I approached this spike
-      - basically, I just explored the various ways to do this: threading, forking, spawning, etc.
-      - I considered the process to process communications that would be necessary
-        - pipes, sockets, shared file, even redis
-        - sockets seems to be superior to pipes with regards to Windows.
-      - I dug deep into Process module and read a number of articles on the web, including this particularly useful
-        one: http://allenlsy.com/working-with-unix-process-in-ruby/
-      - Being able to set up a no-blocking child forks was a big win over simplifying controlling child processes safely
-        since detaching them would make it necessary to implement more complicated coordination to ensure all processes
-        exited safely
-      - Spawn is worth future consideration.
+    Tried out gemstash, but later removed it over concerns it may have been contributing to a segfault issue and it
+      didn't provide anything valuable for this project.  Just a chance to experiment with it.
+
+    Decided to make it a gem to provide an easy way to drop this into another code base. Worked on making it so the
+      gem could fork many copies of the game but set that aside due to some unexpected issues with gosu. Plus, I did
+      it as an experiment more than it having any clear value.
+
+  Data Structure
+  I started by thinking through the data structure. I attempted to come up with a scheme that would be efficient with
+    memory and allow for greater efficiency
+    I create cells and never destroy them. I keep a list of active cells (these include both live and dead cells). I
+      wanted each cell to just know about its neighbors. My first implementation was to keep a list of surrounding
+      cells, but later decided to keep all cell management in the game controller and not have the cell manage its
+      list of surrounding cells. Each cell only knows itself and relies on the game controller to give it a list
+      of live cells, manage the birthing and funerals for each cell.
+    I kept the basic GOL rules with the cell for efficiency and since the rules are so simple to implement. However,
+      as I progress, the rules will become more complex and so this will probably be best broken out into its own class.
+    For simplicity, I presumed a rigid grid structure, but in the future, I want to try out an approach that frees cells
+      from this and treats them more like free-floating cells that are not perfectly aligned in a grid. In that case,
+      nearness becomes the way to determine how many cells would be near enough to count. I think this opens some
+      interesting possibilities where cells can express life a little more dynamically.
+  GameController
+  Once I had the GOL rules working, and I was happy with the data structure, I started the game controller
+     This, simply handles the tracking of cells on the gameboard and is responsible for the creation and getting of
+     cells and the update loop.
+  Once the game controller was working reasonably well, I started on the visualization, I didn't realize how tough this
+     would be. I lost a lot of time trying to deal with incompatibilities between gosu (and it's requisites), rspec,
+     gemstash, forking, rvm and the ruby version. I finally got to a working state, but had to drop to ruby 2.0.0,
+     remove rvm and re-install brew without rvm and then re-install rvm to get things working together happily. This
+     is something I need to work on later, but with a working stack, I would make progress again.
+  I got a basic visualization working, tweaked the visual aspects of the cells and started working on a simple UI
 
 
-  1/01/2015
-  - Started with the Data structure
-    - cells and their behaviors
-    - did the easy stuff first, then stopped to consider the implications for "birthing" new cells
-    - decided that every live cell would have all cells surrounding it defined but that "dead" cells wouldn't
-      - this allows me to let every "live" cell know it's state without having to loop through all attached
-        cells
-      - I chose to base a cell on a single "pixel" instead of using a technique like hashlife since I wanted
-        to add new/extended behavior's to each cell and that would explode the complexity of the hashlife approach.
-    - I chose to use view the board as a grid like last time, but I would rather try implementing it without a grid
-      which I think would add some interesting possibilities. Nearby cells would be based on distance rather than
-      an 8 compass grid.  But for simplicity and to maintain some control over this project, grids is the way I went
-    - I chose to create cells only when needed and never destroy (but recycle) them to reduce the load on the GC
-
-  1/02/2015
-    - finished cell structure at this point
-      - every live cell has all cells defined around it (alive or dead)
-      - refactored cells significantly at this point
-
-  1/03/2015
-    - Finished up Cell refactor and basic GOL rules
-    - With data structure finished, I decided to create the game from this point from the user's perspective
-    - Researched 2D graphics gems and it came down to Gosu again and a new one ruby2d.
-      - ruby2d offers some interesting possibilities but had issues installing it successfully
-      - gosu proved problematic too
-      - spent a great deal of time trying to get either of these gems to work.
-    - Added Gosu gem for visualization on a computer screen
-      - major problems getting Gosu to install
-        - needed to uninstall rvm, install brew, then re-install rvm, so brew was in its default location
-        - brew install sdl2
-        - then was able to install the gosu gem.
-        - now a segmentation fault issue
-  1/04/2015
-    - I finally figured out that bundler,rspec 3, gosu, gemstash(maybe) and ruby 2.1.x and 2.2.x simply didn't play
-      well together: seg faults, inability to bundle.
-    - ruby 2.0 did the trick, removed gemstash as it was not adding anything anyway, just something fun to play with.
 
 
 

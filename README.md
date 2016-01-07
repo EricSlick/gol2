@@ -1,12 +1,18 @@
 # Gol2
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/gol2`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+An Implementation of the Game of Life with a few twists
 
 ## Installation
 
-Add this line to your application's Gemfile:
+### pre-requisites:
+
+This is a very early version and is quite rough.
+
+You probably need to install some requisite files for Gosu. https://github.com/gosu/gosu/wiki/Getting-Started-on-OS-X
+
+```
+brew install sdl2
+```
 
 ```ruby
 gem 'gol2'
@@ -22,7 +28,12 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Right now, after a successful bundle, you can run it from the gol2 script in the bin folder
+```
+bin/gosu2
+```
+
+This brings up a Gosu Window and randomly places about 20 cell patterns to start. It's very basic atm.
 
 ## Development
 
