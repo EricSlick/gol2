@@ -15,6 +15,8 @@ module Gol2
     ZOrderGame = 2
     ZOrderGameBackground = 3
     ZOrderWindowUI = 4
+    DeadCellColor = 0x44444444
+    LiveCellColor = 0xffffffff
 
     def initialize(options = {})
       self.custom_options = options
@@ -74,7 +76,7 @@ module Gol2
           Gol2::GameController.update_game unless @paused
           self.update_clock += UPDATE_DELAY
           controlled_shutdown if self.shutdown_at_generation && self.shutdown_at_generation == self.game_loop
-          self.shutdown_in = self.delta_time + 10000 unless self.shutdown_in
+          # self.shutdown_in = self.delta_time + 10000 unless self.shutdown_in
         end
       end
     end
@@ -94,11 +96,19 @@ module Gol2
       # a point size of 2 means a single game_height/width location of a cell takes up 4 pixels on the game_window
 
       Gol2::GameController.get_active_cells.each do |key, cell|
-        draw_quad(cell.x_loc * self.point_size, cell.y_loc, 0xffffffff,
-                  cell.x_loc * self.point_size + 2, cell.y_loc, 0xffffffff,
-                  cell.x_loc * self.point_size, cell.y_loc + 2, 0xffffffff,
-                  cell.x_loc * self.point_size + 2, cell.y_loc + 2, 0xffffffff,
-                  0)
+        if cell.alive
+          draw_quad(cell.x_loc * self.point_size, cell.y_loc * self.point_size, LiveCellColor,
+                    cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size, LiveCellColor,
+                    cell.x_loc * self.point_size, cell.y_loc * self.point_size + self.point_size, LiveCellColor,
+                    cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size + self.point_size, LiveCellColor,
+                    0)
+        else
+          draw_quad(cell.x_loc * self.point_size, cell.y_loc * self.point_size, DeadCellColor,
+                    cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size, DeadCellColor,
+                    cell.x_loc * self.point_size, cell.y_loc * self.point_size + self.point_size, DeadCellColor,
+                    cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size + self.point_size, DeadCellColor,
+                    1)
+        end
       end
     end
 

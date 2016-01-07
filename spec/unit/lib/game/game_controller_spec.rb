@@ -14,9 +14,9 @@ describe "Given a #{Gol2::GameController.name} class" do
     end
 
     it 'sets the game_height/width' do
-      gol2_controller.run
+      gol2_controller.run({game_width: 400, game_height: 123})
       expect(gol2_controller.game_width).to eq 400
-      expect(gol2_controller.game_height).to eq 400
+      expect(gol2_controller.game_height).to eq 123
     end
 
     it 'sets the cell_size' do
@@ -137,10 +137,7 @@ describe "Given a #{Gol2::GameController.name} class" do
           row: {b: 15, a: 15},
           backslash: {b: 19, a: 9},
           forwardslash: {b: 19, a: 9},
-          ul_corner: {b: 15, a: 16},
-          ur_corner: {b: 15, a: 16},
-          ll_corner: {b: 15, a: 16},
-          lr_corner: {b: 15, a: 16}
+          ul_corner: {b: 15, a: 16}
       }.each do |seed_type, values|
         it "a seed type of #{seed_type} (in isolation) will have the correct number of cells" do
           gol2_controller.reset

@@ -1,8 +1,8 @@
 module Gol2
   class Cell
-    attr_accessor :x_loc, :y_loc
-    attr_accessor :neighbor_keys
-    attr_accessor :cell_age, :alive, :alive_next, :key
+    attr_accessor :x_loc, :y_loc, :key, :neighbor_keys,
+                  :cell_age, :alive, :alive_next, :decay_counter, :birth_counter
+
 
     # xy is from upper left corner
     COMPASS_POINTS = {
@@ -22,7 +22,19 @@ module Gol2
       self.x_loc = 0
       self.y_loc = 0
       self.cell_age = 1
+      self.decay_counter = 100
+      self.birth_counter = 0
       regenerate_neighbor_keys
+    end
+
+    def increment_decay
+      self.decay_counter = 100 if self.decay_counter = -1
+      self.decay_counter -= 1
+    end
+
+    def increment_birth
+      self.birth_counter = 0 if self.birth_counter = 101
+      self.birth_counter += 1
     end
 
     def x_loc=(value)

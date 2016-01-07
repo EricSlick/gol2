@@ -16,33 +16,24 @@ module Gol2
     # define shapes for a viable cell grouping
     # center cell is implied
     VIABLE_SHAPES = {
-        #
-        column: [:n, :s], #
-        #
-        row: [:w, :e], ###
-        #
-        backslash: [:nw, :se], #
-        #
-        #
-        forwardslash: [:ne, :sw], #
-        #
-        ##
-        ul_corner: [:e, :s], #
-
-        ##
-        ur_corner: [:w, :s],   #
-
-        #
-        lr_corner: [:n, :w], ##
-
-        #
-        ll_corner: [:n, :e] ##
+        column: [:n, :s],
+        row: [:w, :e],
+        backslash: [:nw, :se],
+        forwardslash: [:ne, :sw],
+        bent_left: [:nw, :s],
+        ul_corner: [:e, :s],
+        box: [:nw, :n, :ne, :w, :e, :sw, :s, :se],
+        capital_u: [:nw, :ne, :w, :e, :sw, :s, :se],
+        lower_u: [:w, :e, :sw, :s, :se],
+        ul_corner: [:sw, :w, :nw, :n, :ne],
+        diamond: [:w, :n, :e, :s],
+        corners: [:nw, :ne, :se, :sw],
     }
 
     DEFAULT_OPTIONS = {
-        game_width: 400,
-        game_height: 400,
-        cell_size: 2
+        game_width: 300,
+        game_height: 200,
+        cell_size: 4
     }
 
     class << self
@@ -54,7 +45,7 @@ module Gol2
         self.custom_options = options
         self.reset
         unless self.skip_visualization
-          self.seed_universe
+          self.seed_universe(10)
           self.game_window = Gol2::GameWindow.new(options)
           self.game_window.show
         end
@@ -219,7 +210,7 @@ module Gol2
       # gets an x/y location without any cells in it
       # returns nil if it can't find one in 20 attempts
       # this should be used to begin a new gol
-      # todo: optimize this if it's to be used later in the game
+      # todo: optimize this if it's to be used more than occasionally within the update
       def get_empty_location(area = nil)
         case area
           when :center
