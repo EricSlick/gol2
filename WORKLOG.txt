@@ -86,7 +86,12 @@ note: Since I wasn't doing this as a formal test, I used the time to pursue seve
      is something I need to work on later, but with a working stack, I would make progress again.
   I got a basic visualization working, tweaked the visual aspects of the cells and started working on a simple UI
 
+  The Visualization is experimental/spikey atm. It's roughly coded and needs plenty of love.
 
+  The rest of the code is in better shape and reflects TDD practices (most of the time). I found myself slipping and
+     when experimenting/spiking, I didn't write a lot of tests.
+
+  I refactored the code significantly many times and the tests were a lifesaver as always.
 
 
 
