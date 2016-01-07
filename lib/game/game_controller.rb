@@ -25,7 +25,7 @@ module Gol2
         box: [:nw, :n, :ne, :w, :e, :sw, :s, :se],
         capital_u: [:nw, :ne, :w, :e, :sw, :s, :se],
         lower_u: [:w, :e, :sw, :s, :se],
-        ul_corner: [:sw, :w, :nw, :n, :ne],
+        ul_corner_big: [:sw, :w, :nw, :n, :ne],
         diamond: [:w, :n, :e, :s],
         corners: [:nw, :ne, :se, :sw],
     }

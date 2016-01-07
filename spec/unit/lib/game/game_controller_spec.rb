@@ -133,10 +133,10 @@ describe "Given a #{Gol2::GameController.name} class" do
     context 'and after one generation' do
 
       {
-          column: {b: 15, a: 15},
-          row: {b: 15, a: 15},
-          backslash: {b: 19, a: 9},
-          forwardslash: {b: 19, a: 9},
+          # column: {b: 15, a: 15},
+          # row: {b: 15, a: 15},
+          # backslash: {b: 19, a: 9},
+          # forwardslash: {b: 19, a: 9},
           ul_corner: {b: 15, a: 16}
       }.each do |seed_type, values|
         it "a seed type of #{seed_type} (in isolation) will have the correct number of cells" do
