@@ -44,20 +44,12 @@ module Gol2
       end
     end
 
-    def age_cell
+    def changed_life_state
       raise "Can't age cell until it's lived its life (#live_life) first" if !@lived_life
-      if self.alive_next
-        if !self.alive
-          #cell just gave birth
-          self.alive = self.alive_next
-        end
-      else
-        if self.alive
-          #cell just died
-          self.alive = self.alive_next
-        end
-      end
+      changed = self.alive != self.alive_next
+      self.alive = self.alive_next
       @life_lived = false
+      changed
     end
 
     #

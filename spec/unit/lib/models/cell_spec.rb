@@ -97,7 +97,7 @@ describe "Given a #{Gol2::Cell.name} class" do
       it 'then it dies' do
         allow(cell).to receive(:live_neighbors).and_return({})
         cell.live_life
-        cell.age_cell
+        cell.changed_life_state
         expect(cell.alive).to eq false
       end
     end
@@ -106,7 +106,7 @@ describe "Given a #{Gol2::Cell.name} class" do
       it 'then it dies' do
         allow(cell).to receive(:live_neighbors).and_return({1 => nil})
         cell.live_life
-        cell.age_cell
+        cell.changed_life_state
         expect(cell.alive).to eq false
       end
     end
@@ -115,7 +115,7 @@ describe "Given a #{Gol2::Cell.name} class" do
       it 'then it lives another generation' do
         allow(cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil})
         cell.live_life
-        cell.age_cell
+        cell.changed_life_state
         expect(cell.alive).to eq true
       end
     end
@@ -124,7 +124,7 @@ describe "Given a #{Gol2::Cell.name} class" do
       it 'then it lives another generation' do
         allow(cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil, 3 => nil})
         cell.live_life
-        cell.age_cell
+        cell.changed_life_state
         expect(cell.alive).to eq true
       end
     end
@@ -133,24 +133,19 @@ describe "Given a #{Gol2::Cell.name} class" do
       it "then it dies due to over-population" do
         allow(cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil, 3 => nil, 4 => nil})
         cell.live_life
-        cell.age_cell
+        cell.changed_life_state
         expect(cell.alive).to eq false
       end
     end
 
     context "when a dead cell has exactly three neighbors" do
-      # triangle row corner disconnected
-      #   *  ***  *      *
-      #  *#*  #  #*  #*   #
-      #           *  **   * *
-      #
       it 'then it becomes a living cell as if by birth' do
         expect(dead_cell.alive).to eq false
         allow(dead_cell).to receive(:live_neighbors).and_return({1 => nil, 2 => nil, 3 => nil})
         dead_cell.live_life
         expect(dead_cell.alive_next).to eq true
         expect(dead_cell.alive).to eq false
-        dead_cell.age_cell
+        dead_cell.changed_life_state
         expect(dead_cell.alive).to eq true
       end
     end

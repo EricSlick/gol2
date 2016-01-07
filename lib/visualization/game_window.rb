@@ -2,9 +2,11 @@ require 'gosu'
 
 module Gol2
   class GameWindow < Gosu::Window
-    attr_accessor :shutdown, :shutdown_in, :shutdown_at_generation, :exit_code, :game_controller,
-                  :game_loop, :game_clock, :update_clock, :delta_time, :actual_time, :shutdown_time,
-                  :options
+    attr_accessor :shutdown, :shutdown_in, :shutdown_at_generation, :exit_code, :options,
+                  :game_loop, :game_clock, :update_clock, :delta_time, :last_time, :shutdown_time,
+                  :point_size, :scale, :game_width, :game_height, :game_window_width, :game_window_height,
+                  :window_width, :window_height
+
 
     UPDATE_DELAY = 1000
 
@@ -14,25 +16,33 @@ module Gol2
     ZOrderWindowUI = 4
 
     DEFAULTS = {
-        window_width: 640,
-        window_height: 480,
-        game_width: 620,
-        game_height: 400
+        game_window_width: 640,
+        game_window_height: 480,
+        scale: 1
     }
 
     def initialize(custom_options = {})
       self.options = DEFAULTS.merge(custom_options)
-      super options[:window_width], options[:window_height], false
-      self.shutdown_in = options[:shutdown_in]
-      self.shutdown_at_generation = options[:shutdown_at_generation]
+      super options[:game_window_width], options[:game_window_height], false
+      update_options
+
       #@font = Gosu::Font.new(self, Gosu::default_font_name, 18)
       @font = Gosu::Font.new(20)
       # @font = Gosu::Font.new(self, "Arial", 18)
+
       self.game_loop = 0
-      self.caption = "Gosu Tutorial Game"
+      self.caption = "Game of Life 2"
       self.game_clock = 0
       self.delta_time = 0
-      self.update_clock = -1
+      self.update_clock = 0
+      self.last_time = 0
+    end
+
+    def update_options
+      self.shutdown_in = options[:shutdown_in]
+      self.shutdown_at_generation = options[:shutdown_at_generation]
+      self.scale = options[:scale]
+      self.point_size = self.scale
     end
 
     def controlled_shutdown
@@ -49,11 +59,12 @@ module Gol2
     end
 
     def update
-      self.delta_time = Gosu::milliseconds - self.game_clock
-      self.game_clock = Gosu::milliseconds()
+      self.delta_time = Gosu::milliseconds - self.last_time
+      self.last_time = Gosu::milliseconds
       check_shutdown
       if !@paused
-        if self.game_clock > self.update_clock
+        self.game_clock += self.delta_time
+        if self.game_clock >= self.update_clock
           self.game_loop += 1
           Gol2::GameController.update_game unless @paused
           self.update_clock += UPDATE_DELAY

@@ -1,32 +1,39 @@
 require 'spec_helper'
 
 describe "Given a #{Gol2::GameController.name} class" do
-  let(:gol2_controller){ Gol2::GameController}
+  let(:gol2_controller) { Gol2::GameController }
 
   before :each do
     gol2_controller.reset
   end
 
-  it 'has a game board' do
-    expect(gol2_controller.game_width).to be > 100
-    expect(gol2_controller.game_height).to be > 100
-  end
+  context "#run" do
+    it 'can run the game' do
+      gol2_controller.skip_visualization = true
+      expect(gol2_controller.run).to eq true
+    end
 
-  it 'can run the game' do
-    gol2_controller.skip_visualization = true
-    expect(gol2_controller.run).to eq true
+    it 'sets the game_window height/width to native screen pixels' do
+      gol2_controller.run
+      expect(gol2_controller.window_width).to eq 640
+      expect(gol2_controller.window_height).to eq 480
+    end
+
+    it 'sets the game_point height/width to screen points' do
+      gol2_controller.run({game_scale: 2})
+      expect(gol2_controller.game_width).to eq 640/2
+      expect(gol2_controller.game_height).to eq 400/2
+    end
   end
 
   it 'can reset the game options' do
     gol2_controller.run({one: "two", three: 'four'})
     gol2_controller.active_cells = {1 => 'one', 2 => 'two'}
     gol2_controller.reserve_cells = [1, 2, 3]
-    gol2_controller.game_width = 123
     gol2_controller.reset
     expect(gol2_controller.active_cells).to eq({})
     expect(gol2_controller.reserve_cells).to eq([])
     expect(gol2_controller.custom_options[:one]).to eq "two"
-    expect(gol2_controller.game_width).to eq(Gol2::GameController::DEFAULT_OPTIONS[:game_width])
   end
 
   it 'can return active_cells' do
@@ -105,23 +112,45 @@ describe "Given a #{Gol2::GameController.name} class" do
 
   context 'when seeding' do
     it '#seed_viable_cell_group creates a group of cells capable of growing' do
-      seed_cell = gol2_controller.send(:seed_viable_cell_group)
+      seed_cell = gol2_controller.send(:seed_viable_cell_group, Gol2::GameController::SEED_TYPE[:column])
       expect(seed_cell).to_not be_nil
       expect(seed_cell.live_neighbors.length).to eq 2
     end
 
+    it 'alive and next_alive are the same on a cell after creation' do
+      gol2_controller.send(:seed_viable_cell_group, Gol2::GameController::SEED_TYPE[:column])
+      gol2_controller.active_cells.each do |key, cell|
+        expect(cell.alive).to eq cell.alive_next
+      end
+
+    end
+
     it '#seed_universe with 1 seed creates the correct number of cells' do
-      gol2_controller.seed_universe(1, Gol2::GameController::SEED_TYPE[:random])
-      expect(gol2_controller.active_cells.length).to eq 9
+      gol2_controller.seed_universe(1, Gol2::GameController::SEED_TYPE[:column])
+      expect(gol2_controller.active_cells.length).to eq 15
       expect(gol2_controller.reserve_cells.length).to eq 0
     end
 
     context 'and after one generation' do
-      it 'will have generated additional cells' do
-        gol2_controller.seed_universe(1, Gol2::GameController::SEED_TYPE[:random])
-        active_cells = gol2_controller.get_active_cells.length
-        gol2_controller.update_game
-        expect(gol2_controller.get_active_cells.length).to be > active_cells
+
+      {
+          column: {b: 15, a: 15},
+          row: {b: 15, a: 15},
+          backslash: {b: 19, a: 9},
+          forwardslash: {b: 19, a: 9},
+          ul_corner: {b: 15, a: 16},
+          ur_corner: {b: 15, a: 16},
+          ll_corner: {b: 15, a: 16},
+          lr_corner: {b: 15, a: 16}
+      }.each do |seed_type, values|
+        it "a seed type of #{seed_type} (in isolation) will have the correct number of cells" do
+          gol2_controller.reset
+          gol2_controller.seed_universe(1, seed_type)
+          active_cells = gol2_controller.get_active_cells.length
+          expect(active_cells).to eq (values[:b])
+          gol2_controller.update_game
+          expect(gol2_controller.get_active_cells.length).to eq values[:a]
+        end
       end
     end
   end

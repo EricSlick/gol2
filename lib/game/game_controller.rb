@@ -2,7 +2,15 @@
 module Gol2
   class GameController
     SEED_TYPE = {
-        random: :random
+        random: :random,
+        column: :column,
+        row: :row,
+        backslash: :backslash,
+        forwardslash: :forwardslash,
+        ul_corner: :ul_corner,
+        ur_corner: :ur_corner,
+        ll_corner: :ll_corner,
+        lr_corner: :lr_corner
     }
 
     # define shapes for a viable cell grouping
@@ -32,30 +40,32 @@ module Gol2
     }
 
     DEFAULT_OPTIONS = {
-        game_width: 640,
-        game_height: 400,
         window_width: 640,
-        window_height: 400
+        window_height: 480,
+        game_window_width: 640,
+        game_window_height: 400,
+        game_scale: 1
     }
 
     class << self
-      attr_accessor :skip_visualization
-      attr_accessor :game_window, :active_cells, :reserve_cells, :game_options, :custom_options
-      attr_accessor :game_width, :game_height, :window_width, :window_height, :generations
+      attr_accessor :skip_visualization, :game_options, :custom_options, :generations,
+                    :game_window, :active_cells, :reserve_cells,
+                    :game_width, :game_height, :game_window_width, :game_window_height,
+                    :window_width, :window_height, :game_scale
 
       def run(options = {})
         self.custom_options = options
         self.reset
         unless self.skip_visualization
           self.seed_universe
-          self.game_window = Gol2::GameWindow.new(options)
-          self.game_window.game_controller = self
+          self.game_window = Gol2::GameWindow.new(self.game_options)
           self.game_window.show
         end
         true
       end
 
       def update_game
+        self.generations ||= 0
         self.generations += 1
         if self.active_cells
           self.active_cells.each do |key, cell|
@@ -64,9 +74,7 @@ module Gol2
           new_living_cells = []
           new_dead_cells = []
           self.active_cells.each do |key, cell|
-            changed_life = cell.alive != cell.alive_next
-            cell.age_cell
-            if changed_life
+            if cell.changed_life_state
               if cell.alive
                 new_living_cells.push(cell)
               else
@@ -90,8 +98,13 @@ module Gol2
       def reset
         self.custom_options ||=  {}
         self.game_options = DEFAULT_OPTIONS.merge(self.custom_options)
-        self.game_width = self.game_options[:game_width]
-        self.game_height = self.game_options[:game_height]
+        self.window_width = self.game_options[:window_width]
+        self.window_height = self.game_options[:window_height]
+        self.game_window_width = self.game_options[:game_window_width]
+        self.game_window_height = self.game_options[:game_window_height]
+        self.game_scale = self.game_options[:game_scale]
+        self.game_width = self.game_options[:game_window_width] / self.game_scale
+        self.game_height = self.game_options[:game_window_height] / self.game_scale
         self.reserve_cells ||= []
         self.active_cells ||= {}
         self.active_cells.clear
@@ -138,6 +151,8 @@ module Gol2
           fetched_cell = self.reserve_cells.pop || Gol2::Cell.new
           fetched_cell.x_loc = fetch_key / KEY_OFFSET
           fetched_cell.y_loc = fetch_key % KEY_OFFSET
+          fetched_cell.alive = false
+          fetched_cell.alive_next = false
           self.active_cells[fetch_key] = fetched_cell
         end
         fetched_cell
@@ -165,14 +180,16 @@ module Gol2
 
       def handle_funeral_for(cell)
         cell.all_neighbors.each do |key, n_cell|
-          move_cell_to_reserve(n_cell) if n_cell
+          move_cell_to_reserve(n_cell) if n_cell && !n_cell.alive
         end
         move_cell_to_reserve(cell)
       end
 
       def move_cell_to_reserve(cell)
-        self.active_cells.delete(cell.key) if cell.live_neighbors.length == 0
-        self.reserve_cells.push(cell)
+        if cell.live_neighbors.length == 0
+          self.active_cells.delete(cell.key)
+          self.reserve_cells.push(cell)
+        end
       end
 
       private
@@ -186,6 +203,8 @@ module Gol2
               when SEED_TYPE[:random]
                 random_key = VIABLE_SHAPES.keys[Random.rand(VIABLE_SHAPES.length)]
                 VIABLE_SHAPES[random_key]
+              else
+                VIABLE_SHAPES[seed_type]
             end
 
         location = get_empty_location(:center)
@@ -197,7 +216,8 @@ module Gol2
         seed_shape.each do |compass_point|
           next_cell = fetch_cell_at(seed_cell.get_neighbor_key(compass_point))
           next_cell.alive = true
-          seed_cell.alive_next = true
+          next_cell.alive_next = true
+          create_surrounding_cells_for(next_cell)
         end
 
         return seed_cell
