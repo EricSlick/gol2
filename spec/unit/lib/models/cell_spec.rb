@@ -152,10 +152,10 @@ describe "Given a #{Gol2::Cell.name} class" do
 
     context "to support birth and decay" do
       it 'has a decay counter' do
-        expect{cell.increment_decay}.to change{cell.decay_counter}.by -1
+        expect{cell.increment_decay}.to change{cell.decay_counter}
       end
       it 'has a birth counter' do
-        expect{cell.increment_birth}.to change{cell.birth_counter}.by 1
+        expect{cell.increment_birth}.to change{cell.birth_counter}
       end
     end
 
