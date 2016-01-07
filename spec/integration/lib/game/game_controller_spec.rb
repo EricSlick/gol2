@@ -29,6 +29,5 @@ describe "Integration of #{Gol2::GameController.name} with #{Gol2::GameWindow.na
       expect(gol2_controller.game_window.game_loop).to eq(3)
       expect(gol2_controller.generations).to eq(3)
     end
-
   end
 end

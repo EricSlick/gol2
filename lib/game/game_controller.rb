@@ -40,25 +40,22 @@ module Gol2
     }
 
     DEFAULT_OPTIONS = {
-        window_width: 640,
-        window_height: 480,
-        game_window_width: 640,
-        game_window_height: 400,
-        game_scale: 1
+        game_width: 400,
+        game_height: 400,
+        cell_size: 2
     }
 
     class << self
       attr_accessor :skip_visualization, :game_options, :custom_options, :generations,
                     :game_window, :active_cells, :reserve_cells,
-                    :game_width, :game_height, :game_window_width, :game_window_height,
-                    :window_width, :window_height, :game_scale
+                    :game_width, :game_height, :cell_size
 
       def run(options = {})
         self.custom_options = options
         self.reset
         unless self.skip_visualization
           self.seed_universe
-          self.game_window = Gol2::GameWindow.new(self.game_options)
+          self.game_window = Gol2::GameWindow.new(options)
           self.game_window.show
         end
         true
@@ -98,13 +95,9 @@ module Gol2
       def reset
         self.custom_options ||=  {}
         self.game_options = DEFAULT_OPTIONS.merge(self.custom_options)
-        self.window_width = self.game_options[:window_width]
-        self.window_height = self.game_options[:window_height]
-        self.game_window_width = self.game_options[:game_window_width]
-        self.game_window_height = self.game_options[:game_window_height]
-        self.game_scale = self.game_options[:game_scale]
-        self.game_width = self.game_options[:game_window_width] / self.game_scale
-        self.game_height = self.game_options[:game_window_height] / self.game_scale
+        self.game_width = self.game_options[:game_width]
+        self.game_height = self.game_options[:game_height]
+        self.cell_size = self.game_options[:cell_size]
         self.reserve_cells ||= []
         self.active_cells ||= {}
         self.active_cells.clear

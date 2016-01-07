@@ -13,16 +13,15 @@ describe "Given a #{Gol2::GameController.name} class" do
       expect(gol2_controller.run).to eq true
     end
 
-    it 'sets the game_window height/width to native screen pixels' do
+    it 'sets the game_height/width' do
       gol2_controller.run
-      expect(gol2_controller.window_width).to eq 640
-      expect(gol2_controller.window_height).to eq 480
+      expect(gol2_controller.game_width).to eq 400
+      expect(gol2_controller.game_height).to eq 400
     end
 
-    it 'sets the game_point height/width to screen points' do
-      gol2_controller.run({game_scale: 2})
-      expect(gol2_controller.game_width).to eq 640/2
-      expect(gol2_controller.game_height).to eq 400/2
+    it 'sets the cell_size' do
+      gol2_controller.run({cell_size: 3})
+      expect(gol2_controller.cell_size).to eq 3
     end
   end
 

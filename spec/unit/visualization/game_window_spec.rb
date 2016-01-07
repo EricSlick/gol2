@@ -1,24 +1,8 @@
 require 'spec_helper'
 
 describe Gol2::GameWindow do
-  let!(:gol2_window) { Gol2::GameWindow.new }
-  let!(:gol2_w_scaled) {Gol2::GameWindow.new({scale: 2})}
+  let(:gol2_window) { Gol2::GameWindow.new }
 
-  context 'when initialized to a scale of 2' do
-
-    it 'sets a screen point size' do
-      expect(gol2_w_scaled.point_size).to eq 2
-    end
-
-    context 'the game_board is measured in points' do
-
-    end
-
-    context 'a scaling factor can be passed in' do
-
-    end
-
-  end
   it 'can create a gosu window' do
     expect(gol2_window.methods).to include(:show, :update, :draw)
   end

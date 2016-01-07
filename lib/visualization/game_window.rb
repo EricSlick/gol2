@@ -2,10 +2,11 @@ require 'gosu'
 
 module Gol2
   class GameWindow < Gosu::Window
-    attr_accessor :shutdown, :shutdown_in, :shutdown_at_generation, :exit_code, :options,
+    attr_accessor :shutdown, :shutdown_in, :shutdown_at_generation, :exit_code, :custom_options,
                   :game_loop, :game_clock, :update_clock, :delta_time, :last_time, :shutdown_time,
-                  :point_size, :scale, :game_width, :game_height, :game_window_width, :game_window_height,
-                  :window_width, :window_height
+                  :point_size, :scale, :cell_size,
+                  :game_width, :game_height, :game_window_width, :game_window_height,
+                  :window_width, :window_height, :ui_width, :ui_height
 
 
     UPDATE_DELAY = 1000
@@ -15,16 +16,10 @@ module Gol2
     ZOrderGameBackground = 3
     ZOrderWindowUI = 4
 
-    DEFAULTS = {
-        game_window_width: 640,
-        game_window_height: 480,
-        scale: 1
-    }
-
-    def initialize(custom_options = {})
-      self.options = DEFAULTS.merge(custom_options)
-      super options[:game_window_width], options[:game_window_height], false
-      update_options
+    def initialize(options = {})
+      self.custom_options = options
+      update_settings
+      super self.window_width, self.window_height, false
 
       #@font = Gosu::Font.new(self, Gosu::default_font_name, 18)
       @font = Gosu::Font.new(20)
@@ -38,11 +33,21 @@ module Gol2
       self.last_time = 0
     end
 
-    def update_options
-      self.shutdown_in = options[:shutdown_in]
-      self.shutdown_at_generation = options[:shutdown_at_generation]
-      self.scale = options[:scale]
-      self.point_size = self.scale
+    def update_settings
+      self.shutdown_in = self.custom_options[:shutdown_in]
+      self.shutdown_at_generation = self.custom_options[:shutdown_at_generation]
+      self.game_width = Gol2::GameController.game_width
+      self.game_height = Gol2::GameController.game_height
+      self.point_size = Gol2::GameController.cell_size
+
+      self.game_window_width = self.game_width * self.point_size
+      self.game_window_height = self.game_height * self.point_size
+
+      # todo: handle UI specifications more dynamically
+      self.ui_width = 100
+      self.ui_height = 80
+      self.window_width = self.game_window_width + self.ui_width
+      self.window_height = self.game_window_height + self.ui_height
     end
 
     def controlled_shutdown
@@ -82,8 +87,18 @@ module Gol2
     end
 
     def draw_cells
+      # game_height and width are not the same as game_window_height and width
+      # game_height/width is used by the controller to handle the internal size of the game area
+      # the game_window_width/height is modified to fit one point size per game_height/width
+      # so, when drawing a cell, we have to take into account the visual size (point size) of the cell
+      # a point size of 2 means a single game_height/width location of a cell takes up 4 pixels on the game_window
+
       Gol2::GameController.get_active_cells.each do |key, cell|
-        draw_quad(cell.x_loc, cell.y_loc, 0xffffffff, cell.x_loc + 2, cell.y_loc, 0xffffffff, cell.x_loc, cell.y_loc + 2, 0xffffffff, cell.x_loc + 2, cell.y_loc + 2, 0xffffffff, 0)
+        draw_quad(cell.x_loc * self.point_size, cell.y_loc, 0xffffffff,
+                  cell.x_loc * self.point_size + 2, cell.y_loc, 0xffffffff,
+                  cell.x_loc * self.point_size, cell.y_loc + 2, 0xffffffff,
+                  cell.x_loc * self.point_size + 2, cell.y_loc + 2, 0xffffffff,
+                  0)
       end
     end
 
