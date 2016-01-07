@@ -2,25 +2,24 @@ require 'gosu'
 
 module Gol2
   class GameWindow < Gosu::Window
-    attr_accessor :shutdown, :shutdown_in, :shutdown_at_generation, :exit_code, :custom_options,
-                  :game_loop, :game_clock, :update_clock, :delta_time, :last_time, :shutdown_time,
-                  :point_size, :scale, :cell_size,
+    attr_accessor :shutdown,:shutdown_time, :shutdown_in, :shutdown_at_generation, :exit_code,
+                  :game_loop, :game_clock, :update_clock, :delta_time, :last_time,
+                  :custom_options, :point_size, :scale, :cell_size, :game_speed, :framerate,
                   :game_width, :game_height, :game_window_width, :game_window_height,
-                  :window_width, :window_height, :ui_width, :ui_height
+                  :window_width, :window_height, :ui_width, :ui_height, :game_pos_x, :game_pos_y,
+                  :ui_icons
 
 
-    UPDATE_DELAY = 1000
-
-    ZOrderGameUI = 1
+    ZOrderGameUI = 3
     ZOrderGame = 2
-    ZOrderGameBackground = 3
-    ZOrderWindowUI = 4
+    ZOrderGameBackground = 1
+    ZOrderUI = 4
     DeadCellColor = Gosu::Color.argb(0x66666666)
     LiveCellColor = Gosu::Color.argb(0xffffffff)
-    BackgroundColor1 = Gosu::Color.argb(0xff111122)
-    BackgroundColor2 = Gosu::Color.argb(0xff001122)
-    BackgroundColor3 = Gosu::Color.argb(0xff110022)
-    BackgroundColor4 = Gosu::Color.argb(0xff000022)
+    BackgroundColor1 = Gosu::Color.argb(0xff002233)
+    BackgroundColor2 = Gosu::Color.argb(0xff001133)
+    BackgroundColor3 = Gosu::Color.argb(0xff110033)
+    BackgroundColor4 = Gosu::Color.argb(0xff000033)
 
 
     def initialize(options = {})
@@ -38,6 +37,7 @@ module Gol2
       self.delta_time = 0
       self.update_clock = 0
       self.last_time = 0
+      self.game_speed = 1000
     end
 
     def update_settings
@@ -51,10 +51,18 @@ module Gol2
       self.game_window_height = self.game_height * self.point_size
 
       # todo: handle UI specifications more dynamically
-      self.ui_width = 100
+      self.ui_width = 200
       self.ui_height = 80
+      self.game_pos_x = 0
+      self.game_pos_y = self.ui_height
       self.window_width = self.game_window_width + self.ui_width
       self.window_height = self.game_window_height + self.ui_height
+
+      # ui icons
+      self.ui_icons ||= {}
+      self.ui_icons[:up_arrow] = Gosu::Image.new(self, 'lib/assets/up_arrow.png')
+      self.ui_icons[:down_arrow] = Gosu::Image.new(self, 'lib/assets/down_arrow.png')
+      self.ui_icons[:title] = Gosu::Image.new(self, 'lib/assets/gol2_title.png')
     end
 
     def controlled_shutdown
@@ -77,20 +85,19 @@ module Gol2
       if !@paused
         self.game_clock += self.delta_time
         if self.game_clock >= self.update_clock
+          self.framerate = 1000 / self.delta_time
           self.game_loop += 1
           Gol2::GameController.update_game unless @paused
-          self.update_clock += UPDATE_DELAY
+          self.update_clock += self.game_speed
           controlled_shutdown if self.shutdown_at_generation && self.shutdown_at_generation == self.game_loop
-          # self.shutdown_in = self.delta_time + 10000 unless self.shutdown_in
         end
       end
     end
 
     def draw
+      draw_game_background
       draw_cells
-      # @font.draw("shutdown_in: #{self.shutdown_in}ms / #{self.game_clock}", 10, 10, ZOrderUI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("game_loop: #{self.game_loop} ActiveCells: #{Gol2::GameController.get_active_cells.length}", 10, 10, ZOrderGameUI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw(@debug, 10, 35, ZOrderGameUI, 1.0, 1.0, 0xff_ffff00) if @debug
+      draw_ui
     end
 
     def draw_cells
@@ -99,11 +106,6 @@ module Gol2
       # the game_window_width/height is modified to fit one point size per game_height/width
       # so, when drawing a cell, we have to take into account the visual size (point size) of the cell
       # a point size of 2 means a single game_height/width location of a cell takes up 4 pixels on the game_window
-      draw_quad(0, 0, BackgroundColor1,
-                self.game_window_width, 0, BackgroundColor2,
-                0, self.game_window_height, BackgroundColor3,
-                self.game_window_width, self.game_window_height, BackgroundColor4,
-                0)
 
       Gol2::GameController.get_active_cells.each do |key, cell|
         if cell.alive
@@ -121,9 +123,44 @@ module Gol2
                     cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size, DeadCellColor,
                     cell.x_loc * self.point_size, cell.y_loc * self.point_size + self.point_size, DeadCellColor,
                     cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size + self.point_size, DeadCellColor,
-                    1)
+                    0)
         end
       end
+    end
+
+    def draw_game_background
+      draw_quad(self.game_pos_x, self.game_pos_y, BackgroundColor1,
+                self.game_window_width, self.game_pos_y, BackgroundColor2,
+                0, self.game_window_height + self.game_pos_y, BackgroundColor3,
+                self.game_window_width, self.game_window_height + self.game_pos_y, BackgroundColor4,
+                0)
+
+    end
+
+    def draw_ui
+      @font.draw("Game Speed", self.game_window_width + 60, 120, ZOrderGameUI, 1.0, 1.0, 0xff_aacc44)
+      @font.draw(self.game_speed, self.game_window_width + 60, 160, ZOrderGameUI, 1.0, 1.0, 0xff_aacc44)
+      self.ui_icons[:up_arrow].draw(self.game_window_width + 15, 100, ZOrderUI, 0.5, 0.5)
+      self.ui_icons[:down_arrow].draw(self.game_window_width + 15, 155, ZOrderUI, 0.5, 0.5)
+
+      # game Title
+      self.ui_icons[:title].draw(self.game_window_width/4, 0, ZOrderUI, 0.8, 0.8)
+
+      # other
+      @font.draw("Paused", self.game_window_width + 60, 80, ZOrderGameUI, 1.0, 1.0, 0xff_ffff44) if @paused
+
+
+      #debug info
+      debug_x = self.game_window_width + 15
+      debug_y = self.game_window_height - 100
+      @font.draw("GameLoop: #{self.game_loop}",
+                 debug_x, debug_y, ZOrderGameUI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("ActiveCells: #{Gol2::GameController.get_active_cells.length}",
+                 debug_x, debug_y + 30, ZOrderGameUI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Framerate: #{self.framerate}",
+                 debug_x, debug_y + 60, ZOrderGameUI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw(@debug, 10, 35, ZOrderGameUI, 1.0, 1.0, 0xff_ffff00) if @debug
+
     end
 
     def needs_cursor?
@@ -131,9 +168,13 @@ module Gol2
     end
 
     def button_down(key_id)
-      if key_id == Gosu::KbSpace then
-        @paused = @paused != true
-        @debug = "Spacebar was hit: paused: #{@paused}"
+      case key_id
+        when Gosu::KbSpace
+          @paused = @paused != true
+        when Gosu::KbUp
+          self.game_speed -= 100 unless self.game_speed < 200
+        when Gosu::KbDown
+          self.game_speed += 100
       end
     end
   end
