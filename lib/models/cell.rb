@@ -22,19 +22,19 @@ module Gol2
       self.x_loc = 0
       self.y_loc = 0
       self.cell_age = 1
-      self.decay_counter = 100
-      self.birth_counter = 0
+      self.decay_counter = 255
+      self.birth_counter = 100
       regenerate_neighbor_keys
     end
 
     def increment_decay
-      self.decay_counter = 100 if self.decay_counter = -1
-      self.decay_counter -= 1
+      self.decay_counter -= 5 unless self.decay_counter == 100
+      self.decay_counter
     end
 
     def increment_birth
-      self.birth_counter = 0 if self.birth_counter = 101
-      self.birth_counter += 1
+      self.birth_counter += 5 unless self.birth_counter == 255
+      self.birth_counter
     end
 
     def x_loc=(value)
@@ -74,6 +74,7 @@ module Gol2
         when 2, 3
         else
           self.alive_next = false
+          self.birth_counter = 100
       end
     end
 
@@ -81,6 +82,7 @@ module Gol2
       case self.live_neighbors.length
         when 3
           self.alive_next = true
+          self.decay_counter = 255
       end
     end
 

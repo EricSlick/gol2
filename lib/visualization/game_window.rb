@@ -15,8 +15,13 @@ module Gol2
     ZOrderGame = 2
     ZOrderGameBackground = 3
     ZOrderWindowUI = 4
-    DeadCellColor = 0x44444444
-    LiveCellColor = 0xffffffff
+    DeadCellColor = Gosu::Color.argb(0x66666666)
+    LiveCellColor = Gosu::Color.argb(0xffffffff)
+    BackgroundColor1 = Gosu::Color.argb(0xff111122)
+    BackgroundColor2 = Gosu::Color.argb(0xff001122)
+    BackgroundColor3 = Gosu::Color.argb(0xff110022)
+    BackgroundColor4 = Gosu::Color.argb(0xff000022)
+
 
     def initialize(options = {})
       self.custom_options = options
@@ -94,15 +99,24 @@ module Gol2
       # the game_window_width/height is modified to fit one point size per game_height/width
       # so, when drawing a cell, we have to take into account the visual size (point size) of the cell
       # a point size of 2 means a single game_height/width location of a cell takes up 4 pixels on the game_window
+      draw_quad(0, 0, BackgroundColor1,
+                self.game_window_width, 0, BackgroundColor2,
+                0, self.game_window_height, BackgroundColor3,
+                self.game_window_width, self.game_window_height, BackgroundColor4,
+                0)
 
       Gol2::GameController.get_active_cells.each do |key, cell|
         if cell.alive
+          LiveCellColor.alpha = cell.increment_birth
+          # @debug = "live color: #{LiveCellColor.inspect} #{cell.birth_counter}"
+          # LiveCellColor.alpha = cell.birth_counter
           draw_quad(cell.x_loc * self.point_size, cell.y_loc * self.point_size, LiveCellColor,
                     cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size, LiveCellColor,
                     cell.x_loc * self.point_size, cell.y_loc * self.point_size + self.point_size, LiveCellColor,
                     cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size + self.point_size, LiveCellColor,
                     0)
         else
+          DeadCellColor.alpha = cell.increment_decay
           draw_quad(cell.x_loc * self.point_size, cell.y_loc * self.point_size, DeadCellColor,
                     cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size, DeadCellColor,
                     cell.x_loc * self.point_size, cell.y_loc * self.point_size + self.point_size, DeadCellColor,
@@ -110,6 +124,10 @@ module Gol2
                     1)
         end
       end
+    end
+
+    def needs_cursor?
+      true
     end
 
     def button_down(key_id)
