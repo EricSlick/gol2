@@ -3,6 +3,12 @@ require 'spec_helper'
 describe Gol2::GameWindow do
   let(:gol2_window) { Gol2::GameWindow.new }
 
+  before :each do
+    allow(Gol2::GameController).to receive(:game_width){400}
+    allow(Gol2::GameController).to receive(:game_height){400}
+    allow(Gol2::GameController).to receive(:cell_size){2}
+  end
+
   it 'can create a gosu window' do
     expect(gol2_window.methods).to include(:show, :update, :draw)
   end

@@ -133,10 +133,10 @@ describe "Given a #{Gol2::GameController.name} class" do
     context 'and after one generation' do
 
       {
-          # column: {b: 15, a: 15},
-          # row: {b: 15, a: 15},
-          # backslash: {b: 19, a: 9},
-          # forwardslash: {b: 19, a: 9},
+          column: {b: 15, a: 15},
+          row: {b: 15, a: 15},
+          backslash: {b: 19, a: 9},
+          forwardslash: {b: 19, a: 9},
           ul_corner: {b: 15, a: 16}
       }.each do |seed_type, values|
         it "a seed type of #{seed_type} (in isolation) will have the correct number of cells" do
@@ -148,6 +148,34 @@ describe "Given a #{Gol2::GameController.name} class" do
           expect(gol2_controller.get_active_cells.length).to eq values[:a]
         end
       end
+
+      it "a seed type of column (in isolation) will alternate between horizontal and vertical" do
+        gol2_controller.reset
+        gol2_controller.seed_universe(1, :column)
+        1.upto(6).each do |index|
+          gol2_controller.update_game
+          expect(gol2_controller.get_active_cells.length).to eq 15
+        end
+      end
+
+      it "a seed type of row (in isolation) will alternate between horizontal and vertical" do
+        gol2_controller.reset
+        gol2_controller.seed_universe(1, :row)
+        1.upto(6).each do |index|
+          gol2_controller.update_game
+          expect(gol2_controller.get_active_cells.length).to eq 15
+        end
+      end
+
+      # it "a seed type of row (in isolation) will alternate between horizontal and vertical" do
+      #   gol2_controller.reset
+      #   gol2_controller.seed_universe(1, :glider)
+      #   1.upto(200).each do |index|
+      #     gol2_controller.update_game
+      #     puts gol2_controller.get_active_cells.length
+      #     # expect(gol2_controller.get_active_cells.length).to eq 15
+      #   end
+      # end
     end
   end
 end
