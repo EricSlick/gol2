@@ -28,6 +28,8 @@ module Gol2
         ul_corner_big: [:sw, :w, :nw, :n, :ne],
         diamond: [:w, :n, :e, :s],
         corners: [:nw, :ne, :se, :sw],
+        l_shape: [:n, :s, :se],
+        glider: [:nw, :e, :s, :sw]
     }
 
     DEFAULT_OPTIONS = {

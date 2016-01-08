@@ -112,16 +112,16 @@ module Gol2
           LiveCellColor.alpha = cell.increment_birth
           # @debug = "live color: #{LiveCellColor.inspect} #{cell.birth_counter}"
           # LiveCellColor.alpha = cell.birth_counter
-          draw_quad(cell.x_loc * self.point_size, cell.y_loc * self.point_size, LiveCellColor,
-                    cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size, LiveCellColor,
-                    cell.x_loc * self.point_size, cell.y_loc * self.point_size + self.point_size, LiveCellColor,
+          draw_quad(cell.x_loc * self.point_size + 1, cell.y_loc * self.point_size + 1, LiveCellColor,
+                    cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size + 1, LiveCellColor,
+                    cell.x_loc * self.point_size + 1, cell.y_loc * self.point_size + self.point_size, LiveCellColor,
                     cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size + self.point_size, LiveCellColor,
                     0)
         else
           DeadCellColor.alpha = cell.increment_decay
-          draw_quad(cell.x_loc * self.point_size, cell.y_loc * self.point_size, DeadCellColor,
-                    cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size, DeadCellColor,
-                    cell.x_loc * self.point_size, cell.y_loc * self.point_size + self.point_size, DeadCellColor,
+          draw_quad(cell.x_loc * self.point_size + 1, cell.y_loc * self.point_size + 1, DeadCellColor,
+                    cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size + 1, DeadCellColor,
+                    cell.x_loc * self.point_size + 1, cell.y_loc * self.point_size + self.point_size, DeadCellColor,
                     cell.x_loc * self.point_size + self.point_size, cell.y_loc * self.point_size + self.point_size, DeadCellColor,
                     0)
         end
