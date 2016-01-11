@@ -1,6 +1,7 @@
 require "gol2/version"
 require "models/cell"
 require "game/game_controller"
+require "visualization/color_pallet"
 require "visualization/game_window"
 
 module Gol2
