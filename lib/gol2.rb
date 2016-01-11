@@ -2,6 +2,8 @@ require "gol2/version"
 require "models/cell"
 require "game/game_controller"
 require "visualization/game_window"
+require "models/ui_base"
+require "models/button"
 
 module Gol2
   KEY_OFFSET = 10000

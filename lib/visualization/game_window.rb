@@ -7,7 +7,7 @@ module Gol2
                   :custom_options, :point_size, :scale, :cell_size, :game_speed, :framerate,
                   :game_width, :game_height, :game_window_width, :game_window_height,
                   :window_width, :window_height, :ui_width, :ui_height, :game_pos_x, :game_pos_y,
-                  :ui_icons
+                  :ui_icons, :lb_down_x, :lb_down_y
 
 
     ZOrderGameUI = 3
@@ -161,10 +161,17 @@ module Gol2
                  debug_x, debug_y + 60, ZOrderGameUI, 1.0, 1.0, 0xff_ffff00)
       @font.draw(@debug, 10, 35, ZOrderGameUI, 1.0, 1.0, 0xff_ffff00) if @debug
 
+      check_hover
     end
 
     def needs_cursor?
       true
+    end
+
+    def check_hover
+      if mouse_x > self.game_window_width
+
+      end
     end
 
     def button_down(key_id)
@@ -175,6 +182,17 @@ module Gol2
           self.game_speed -= 100 unless self.game_speed < 200
         when Gosu::KbDown
           self.game_speed += 100
+        when Gosu::MsLeft
+          self.lb_down_x = mouse_x
+          self.lb_down_y = mouse_y
+      end
+    end
+
+    def button_up(key_id)
+      case key_id
+        when Gosu::MsLeft
+          self.lb_down_x = 0
+          self.lb_down_y = 0
       end
     end
   end
